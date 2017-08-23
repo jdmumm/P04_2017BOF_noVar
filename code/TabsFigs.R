@@ -14,31 +14,48 @@ read.csv("data/bySite_from16SS.csv")%>%
   transmute(year = Year, site = Site_ID, pots = Pot_Count, all_cnt = Total_Spot_Count, all_lb = Total_Spot_Wt_KG * 2.20462, propLrg = Proportion_Large, 
          lrg_cnt = Est_Count_LG, lrg_lb = Est_Wt_Large * 2.20462, cpue_all_lbs = CPUE_All_LB, cpue_all_cnt = CPUE_All_Count, cpue_lrg_cnt=CPUE_Large_Count) ->site
 read.csv("data/SiteStatArea_LUT.csv") -> siteStatLUT
+read.csv("data/yearArea_LUT.csv") -> yearAreaLUT
 read.csv("data/femEggBySite.csv") -> egg
 read.csv("data/PWS Shrimp All.csv") %>%
-  select (year = DOL.Year, species = Species.Code, pots = Effort..sum., lbs = Whole.Weight..sum.) -> harv
+  select (year = DOL.Year, species = Species.Code, stat=Stat.Area, pots = Effort..sum., lbs = Whole.Weight..sum.) -> harv
 
 ## ASSEMBLE TABLES ON JRs LIST ####
-# CPUE (ALL_LB) by ShrimpArea and StatArea
-  # join statArea and ShrimpArea to CPUE 
-    site %>% select(year,site,pots,all_lb) %>%
-    left_join (
-      siteStatLUT %>% select(-Comments), by = c("site" = "SiteNum")) %>%
-      filter(site != 11) -> cpueBySite         #exclude valdez 
+# CPUE (ALL_LB) by ShrimpArea and StatArea - both survey and harvest 
+  #Aggregate Survey ####
+    # join statArea and ShrimpArea to CPUE 
+      site %>% select(year,site,pots,all_lb) %>%
+      left_join (
+        siteStatLUT %>% select(-Comments), by = c("site" = "SiteNum")) %>%
+        filter(site != 11) -> cpueBySite         #exclude valdez 
+    
+    #by ShrimpArea
+      cpueBySite %>% group_by (year,ShrimpArea) %>% summarize (
+        cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByArea
+      dcast(cpueByArea, year ~ ShrimpArea, value.var = "cpueAllLb") -> cpueByArea 
+      #write.csv(cpueByArea,"output/CPUE_allLb_byShrmpArea.csv")
+      
+      # get commercial data and join to above before writing 
+   
+    #by StatArea
+      cpueBySite %>% group_by (year,StatArea) %>% summarize (
+        cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByStat  
+      dcast(cpueByStat, year ~ StatArea, value.var = "cpueAllLb" ) -> cpueByStat
+      #write.csv(cpueByStat,"output/CPUE_allLb_byStatArea.csv")
   
-  #by ShrimpArea
-    cpueBySite %>% group_by (year,ShrimpArea) %>% summarize (
-      cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByArea
-    dcast(cpueByArea, year ~ ShrimpArea, value.var = "cpueAllLb") -> cpueByArea 
-    write.csv(cpueByArea,"output/CPUE_allLb_byShrmpArea.csv")
-    # get commercial data and join to above before writing 
- 
-  #by StatArea
-    cpueBySite %>% group_by (year,StatArea) %>% summarize (
-      cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByStat  
-    dcast(cpueByStat, year ~ StatArea, value.var = "cpueAllLb" ) -> cpueByStat
-    write.csv(cpueByStat,"output/CPUE_allLb_byStatArea.csv")
-
+  # Aggregate Harvest ####   ## still need to rename and join to survey values
+    # join shrimpArea to harvest
+      harv %>% left_join (yearAreaLUT) %>% 
+        na.omit -> harv #exclude those 814 records with null effort
+     # by shrimpArea
+      harv %>% group_by (year,area) %>% summarize (
+        cpueAllLb = sum(lbs)/sum(pots)) -> cpueByArea
+      dcast(cpueByArea, year ~ area, value.var = "cpueAllLb") -> cpueByArea 
+      
+      #by StatArea
+      harv %>% group_by (year,stat) %>% summarize (
+        cpueAllLb = sum(lbs)/sum(pots)) -> cpueByStat  
+      dcast(cpueByStat, year ~ stat, value.var = "cpueAllLb" ) -> cpueByStat
+      
 # prop egg bearing by stat ####
     # join statArea to propEggBearing 
     egg %>% select(YEAR,SITE_ID,males,fems,femsWEggs,femsWValidEggCode) %>%
