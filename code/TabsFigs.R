@@ -82,6 +82,7 @@ read.csv("data/PWS Shrimp All.csv") %>%
     
     eggsBySite %>% group_by(YEAR) %>% summarise(
       perFemWEgg = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggByYear
+      write.csv(eggByYear,"output/eggByYear.csv")
     
     
     
