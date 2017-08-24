@@ -16,7 +16,7 @@ read.csv("data/bySite_from16SS.csv")%>%
 read.csv("data/SiteStatArea_LUT.csv") -> siteStatLUT
 read.csv("data/yearArea_LUT.csv") -> yearAreaLUT
 read.csv("data/femEggBySite.csv") -> egg
-read.csv("data/PWS Shrimp All.csv") %>%
+read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrimp All.xlsx
   select (year = DOL.Year, species = Species.Code, stat=Stat.Area, pots = Effort..sum., lbs = Whole.Weight..sum.) -> harv
 
 ## ASSEMBLE TABLES ON JRs LIST ####
@@ -56,10 +56,10 @@ read.csv("data/PWS Shrimp All.csv") %>%
 # Join HARVEST to SURVEY and write 
     #by ShrimpArea
     left_join(cpueByArea_s,cpueByArea_h, by = "year", suffix = c("_s","_h")) -> cpueByArea
-    write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
+    #write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
     #by StatArea
     left_join(cpueByStat_s,cpueByStat_h, by = "year", suffix = c("_s","_h")) -> cpueByStat
-    write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
+    #write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
     
     
           
