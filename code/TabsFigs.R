@@ -33,15 +33,11 @@ read.csv("data/PWS Shrimp All.csv") %>%
     cpueBySite %>% group_by (year,ShrimpArea) %>% summarize (
       cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByArea
     dcast(cpueByArea, year ~ ShrimpArea, value.var = "cpueAllLb") -> cpueByArea_s 
-    #write.csv(cpueByArea,"output/CPUE_allLb_byShrmpArea.csv")
-    
-    # get commercial data and join to above before writing 
- 
+
   #by StatArea
     cpueBySite %>% group_by (year,StatArea) %>% summarize (
       cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByStat  
     dcast(cpueByStat, year ~ StatArea, value.var = "cpueAllLb" ) -> cpueByStat_s
-    #write.csv(cpueByStat,"output/CPUE_allLb_byStatArea.csv")
 
 # Aggregate HARVEST ####   
   # join shrimpArea to harvest
@@ -57,13 +53,12 @@ read.csv("data/PWS Shrimp All.csv") %>%
       cpueAllLb = sum(lbs)/sum(pots)) -> cpueByStat  
     dcast(cpueByStat, year ~ stat, value.var = "cpueAllLb" ) -> cpueByStat_h
       
-# Join HARVEST to SURVEY
+# Join HARVEST to SURVEY and write 
     #by ShrimpArea
     left_join(cpueByArea_s,cpueByArea_h, by = "year", suffix = c("_s","_h")) -> cpueByArea
     write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
     #by StatArea
     left_join(cpueByStat_s,cpueByStat_h, by = "year", suffix = c("_s","_h")) -> cpueByStat
-    cpueByStat
     write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
     
     
