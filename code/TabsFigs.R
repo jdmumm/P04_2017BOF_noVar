@@ -59,8 +59,8 @@ read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrim
   #by StatArea
     as.character(unique(siteStatLUT$StatArea)) %>% sort -> surveyedStats
     cpueByStat_h %>% select(c(year,one_of( surveyedStats))) -> cpueByStat_h_surveyed  # limit com stats to those that contain survey sites. 
-      left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("_s","_h")) %>%
-      select(order(colnames(.))) -> cpueByStat
+      left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("__s","_h")) %>%
+      select(order(colnames(.)))  -> cpueByStat
       write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
     
 
