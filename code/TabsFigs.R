@@ -52,18 +52,18 @@ read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrim
       cpueAllLb = sum(lbs)/sum(pots)) -> cpueByStat  
     dcast(cpueByStat, year ~ stat, value.var = "cpueAllLb" ) -> cpueByStat_h
 
-# Join HARVEST to SURVEY and write 
-    #by ShrimpArea
+# Join HARVEST to SURVEY and write ####
+  #by ShrimpArea
     left_join(cpueByArea_s,cpueByArea_h, by = "year", suffix = c("_s","_h")) -> cpueByArea
-    #write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
-    #by StatArea
+    write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
+  #by StatArea
     as.character(unique(siteStatLUT$StatArea)) %>% sort -> surveyedStats
     cpueByStat_h %>% select(c(year,one_of( surveyedStats))) -> cpueByStat_h_surveyed  # limit com stats to those that contain survey sites. 
-      left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("_s","_h")) -> cpueByStat
-    #write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
+      left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("_s","_h")) %>%
+      select(order(colnames(.))) -> cpueByStat
+      write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
     
-siteStat <- read.csv("data/SiteStatArea_LUT.csv")    
-unique (siteStat$StatArea) -> surveyedStats # 10 unique, because 2 sites in 476006
+
 
 
 
