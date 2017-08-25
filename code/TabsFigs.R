@@ -26,11 +26,10 @@ read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrim
   # join statArea and ShrimpArea to CPUE 
     site %>% select(year,site,pots,all_lb) %>%
     left_join (
-      siteStatLUT %>% select(-Comments), by = c("site" = "SiteNum")) %>%
-      filter(site != 11) -> cpueBySite         #exclude valdez 
-  
+      siteStatLUT %>% select(-Comments), by = c("site" = "SiteNum")) -> cpueBySite
+      
   #by ShrimpArea
-    cpueBySite %>% group_by (year,ShrimpArea) %>% summarize (
+    cpueBySite %>% filter(site != 11) %>% group_by (year,ShrimpArea) %>% summarize (    #exclude valdez 
       cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByArea
     dcast(cpueByArea, year ~ ShrimpArea, value.var = "cpueAllLb") -> cpueByArea_s 
 
@@ -58,9 +57,9 @@ read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrim
     left_join(cpueByArea_s,cpueByArea_h, by = "year", suffix = c("_s","_h")) -> cpueByArea
     #write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
     #by StatArea
-    as.character(unique(siteStatLUT$StatArea)) -> surveyedStats
-    cpueByStat_h %>% select(c(year,one_of( surveyedStats))) -> cpueByStat_h_surveyed # limit com stats to those that contain survey sites. 
-    left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("_s","_h")) -> cpueByStat
+    as.character(unique(siteStatLUT$StatArea)) %>% sort -> surveyedStats
+    cpueByStat_h %>% select(c(year,one_of( surveyedStats))) -> cpueByStat_h_surveyed  # limit com stats to those that contain survey sites. 
+      left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("_s","_h")) -> cpueByStat
     #write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
     
 siteStat <- read.csv("data/SiteStatArea_LUT.csv")    
