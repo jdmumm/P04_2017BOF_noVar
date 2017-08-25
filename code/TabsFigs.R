@@ -52,16 +52,27 @@ read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrim
     harv %>% group_by (year,stat) %>% summarize (
       cpueAllLb = sum(lbs)/sum(pots)) -> cpueByStat  
     dcast(cpueByStat, year ~ stat, value.var = "cpueAllLb" ) -> cpueByStat_h
-      
+
 # Join HARVEST to SURVEY and write 
     #by ShrimpArea
     left_join(cpueByArea_s,cpueByArea_h, by = "year", suffix = c("_s","_h")) -> cpueByArea
     #write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
     #by StatArea
-    left_join(cpueByStat_s,cpueByStat_h, by = "year", suffix = c("_s","_h")) -> cpueByStat
+    as.character(unique(siteStatLUT$StatArea)) -> surveyedStats
+    cpueByStat_h %>% select(c(year,one_of( surveyedStats))) -> cpueByStat_h_surveyed # limit com stats to those that contain survey sites. 
+    left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("_s","_h")) -> cpueByStat
     #write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
     
-    
+siteStat <- read.csv("data/SiteStatArea_LUT.csv")    
+unique (siteStat$StatArea) -> surveyedStats # 10 unique, because 2 sites in 476006
+
+
+
+
+
+
+
+
           
 # prop egg bearing by stat ####
     # join statArea to propEggBearing 
