@@ -55,51 +55,36 @@ read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrim
 # Join HARVEST to SURVEY and write ####
   #by ShrimpArea
     left_join(cpueByArea_s,cpueByArea_h, by = "year", suffix = c("_s","_h")) -> cpueByArea
-    write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
+    #write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
   #by StatArea
     as.character(unique(siteStatLUT$StatArea)) %>% sort -> surveyedStats
     cpueByStat_h %>% select(c(year,one_of( surveyedStats))) -> cpueByStat_h_surveyed  # limit com stats to those that contain survey sites. 
       left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("__s","_h")) %>%
       select(order(colnames(.)))  -> cpueByStat
-      write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
-    
+      #write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
 
-
-
-
-
-
-
-
-
-          
-# prop egg bearing by stat ####
+# prop egg bearing by stat ####   
     # join statArea to propEggBearing 
     egg %>% select(YEAR,SITE_ID,males,fems,femsWEggs,femsWValidEggCode) %>%
       left_join (
-        siteStatLUT %>% select(SITE_ID=SiteNum,SiteName,StatArea,ShrimpArea)) %>%
-      filter(SITE_ID != 11) -> eggsBySite 
+        siteStatLUT %>% select(SITE_ID=SiteNum,SiteName,StatArea,ShrimpArea)) -> eggsBySite 
     # Aggregate by year and stat area
     eggsBySite %>% group_by(YEAR,StatArea) %>% summarise(
       perFemWEgg = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggByStat
       dcast(eggByStat, YEAR ~ StatArea, value.var = "perFemWEgg") -> eggByStat
-    write.csv(eggByStat,"output/eggByStat.csv")
+    # Survey wide 
+    eggsBySite %>% filter(SITE_ID != 11) %>% group_by(YEAR) %>% summarise(                   # excluding valdez for survey-wide 
+      surveyWide = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggByYear
+    #join by stat area to survey-wide 
+    left_join(eggByStat,eggByYear) -> eggsByStatYear  # Percent of females with eggs by stat area and year w surveywide. Vldz excluded from surveywide.
+    write.csv(eggsByStatYear,"output/eggByStat.csv")
     
-    eggsBySite %>% group_by(YEAR) %>% summarise(
-      perFemWEgg = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggByYear
-      write.csv(eggByYear,"output/eggByYear.csv")
-    
-    
-    
-    
-    
+
     
     
     
     
-    
-    
-    
+############################################################################################    
 ############################################################################################    
 # hasty plot of CPUE Alls by area ####
   par (mfrow = c(3,1))
