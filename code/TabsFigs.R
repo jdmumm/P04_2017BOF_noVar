@@ -18,6 +18,12 @@ read.csv("data/yearArea_LUT.csv") -> yearAreaLUT
 read.csv("data/femEggBySite.csv") -> egg
 read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrimp All.xlsx
   select (year = DOL.Year, species = Species.Code, stat=Stat.Area, pots = Effort..sum., lbs = Whole.Weight..sum.) -> harv
+read.csv('data/AWL_171004.csv') %>% 
+         select(year = YEAR, Event = EVENT_ID, site = SITE_ID, Station = STATION_ID, pot = POT_ID, species = FK_SPECIES_CODE,
+         sex = FK_SEX_CODE, freq = FREQUENCY, cl = CARAPACE_LENGTH_MM, wt = WEIGHT_GRAMS, eggDev = SHRIMP_EGG_DEVEL_CODE, 
+         breed = SHRIMP_BREEDING_CODE, eggCol = SHRIMP_EGG_COLOR_CODE, eggDead = SHRIMP_DEAD_EGG_COUNT, parasite = SHRIMP_PARASITE_CODE) -> awl
+read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site = SITE_ID, pot = POT_ID, Station = STATION, perf = FK_GEAR_PERFORMANCE_CODE, 
+                                                        gearComment = GEAR_COMMENTS, sample = SAMPLE_POT ) -> pp 
 
 ## ASSEMBLE TABLES ON JRs LIST ####
 
@@ -88,14 +94,57 @@ read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrim
                         lrg_cnt = Est_Ct_LG, 
                         lrg_cpue_lb = CPUE_Large_LB, 
                         lrg_cpue_cnt = CPUE_Large_Count) -> main
-
-   # calculate prop sex and prop egg bearing
-    eggsBySite %>% filter(SITE_ID != 11) %>% group_by(YEAR) %>% summarise(                   # excluding valdez for survey-wide 
-      surveyWidePropFem = round(100 * sum(fems)/(sum(males)+sum(fems)),1),
-      surveyWidePropEgg = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggAndSexByYear
+    write.csv(main,"output/main.csv")
+# calculate prop sex and prop egg bearing
+    # eggsBySite %>% filter(SITE_ID != 11) %>% group_by(YEAR) %>% summarise(                   # excluding valdez for survey-wide 
+    #   surveyWidePropFem = round(100 * sum(fems)/(sum(males)+sum(fems)),1),
+    #   surveyWidePropEgg = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggAndSexByYear
          # this matches PropSexForBOF report table, except that some years are null here.  Plan to just copy and paste
          # prop sex and prop fem data from BOF table to the other main survey summary table. 
-    write.csv(main,"output/main.csv")
+
+# Biological - calc mean length by year and sex. 
+    pp %>% select(Event, site, Station, pot, perf) %>%   
+      right_join (awl)   %>% 
+      filter (site != 11, !Station %in% c("E","E1","E2"), 
+              perf == 1, species == 965, sex %in% c(1,2)  ) -> awls   # excluding transitionals 
+    
+    awls %>% group_by(year, sex) %>% summarise(   # there is issue where freq = 2 in 2005 for males, but since grouping by sex and almost all males in 2005 were 2, ok as is 
+      n = n(),   
+      len = mean (cl), 
+      sd = var(cl)^.5) -> meanLen
+   
+    meanLen %>% select (year, sex, len) %>% spread(sex,len) -> cl
+    meanLen %>% select (year, sex, n) %>% spread(sex,n) -> n 
+    meanLen %>% select (year, sex, sd) %>% spread(sex,sd) -> sd 
+    
+    left_join (n,cl, by = 'year') %>% left_join(sd, by = 'year') -> CL
+    colnames(CL) <- c('Year','n_m', 'n_f', 'cl_m', 'cl_f', 'sd_m', 'sd_f')
+    write.csv(CL,'output/clByYearSex.csv') 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 ############################################################################################    
 ############################################################################################    
