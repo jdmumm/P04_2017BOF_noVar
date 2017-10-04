@@ -78,11 +78,24 @@ read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrim
     #join by stat area to survey-wide 
     left_join(eggByStat,eggByYear) -> eggsByStatYear  # Percent of females with eggs by stat area and year w surveywide. Vldz excluded from surveywide.
     write.csv(eggsByStatYear,"output/eggByStat.csv")
-    
+# Main Survey Summary Table ####
+    surv %>% transmute (Year, Pots = Pot_Count,
+                        all_lb =  Total_Spot_Wt_KG  * 2.20462 ,
+                        all_cnt = Total_Spot_Count, 
+                        all_cpue_lb = CPUE_All_LB,
+                        all_cpue_cnt = CPUE_All_Count,
+                        lrg_lb = Est_Wt_Large * 2.20462, 
+                        lrg_cnt = Est_Ct_LG, 
+                        lrg_cpue_lb = CPUE_Large_LB, 
+                        lrg_cpue_cnt = CPUE_Large_Count) -> main
 
-    
-    
-    
+   # calculate prop sex and prop egg bearing
+    eggsBySite %>% filter(SITE_ID != 11) %>% group_by(YEAR) %>% summarise(                   # excluding valdez for survey-wide 
+      surveyWidePropFem = round(100 * sum(fems)/(sum(males)+sum(fems)),1),
+      surveyWidePropEgg = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggAndSexByYear
+         # this matches PropSexForBOF report table, except that some years are null here.  Plan to just copy and paste
+         # prop sex and prop fem data from BOF table to the other main survey summary table. 
+    write.csv(main,"output/main.csv")
     
 ############################################################################################    
 ############################################################################################    
