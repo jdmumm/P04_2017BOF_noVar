@@ -121,10 +121,19 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     colnames(CL) <- c('Year','n_m', 'n_f', 'cl_m', 'cl_f', 'sd_m', 'sd_f')
     write.csv(CL,'output/clByYearSex.csv') 
     
-    
-    
-    
-    
+# Survey-wide CPUE plot ----
+    str(surv)
+    e <- ggplot(data = surv) + theme_classic() + 
+         scale_x_continuous(breaks = seq(1990,2016,2))  +
+         scale_y_continuous(breaks = seq(0,3,.5)) + 
+         labs( x= 'Year', y = 'Mean weight per port (lb)')  
+     e + 
+       geom_point(aes( x = Year, y = CPUE_Large_LB), pch= 19, size = 3) + 
+       geom_line(aes( x = Year, y = CPUE_Large_LB), size = 1) + 
+       geom_point(aes( x = Year, y = CPUE_All_LB), pch= 19, size = 3, col = 'gray50') + 
+       geom_line(aes( x = Year, y = CPUE_All_LB), size = 1, col = 'gray50') 
+
+       # need to add legend. 
     
     
     
