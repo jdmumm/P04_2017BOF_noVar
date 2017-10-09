@@ -9,6 +9,13 @@
 ## Load ####
 library(tidyverse)
 library(reshape2)
+library(extrafont)
+loadfonts(device="win")
+windowsFonts(Times=windowsFont("TT Times New Roman"))
+theme_set(theme_bw(base_size=12,base_family='Times New Roman')+ 
+            theme(panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank()))
+
 read.csv("data/surveyWide_from16SS.csv") -> surv  #Survey-wide summary by year
 read.csv("data/bySite_from16SS.csv")%>%
   transmute(year = Year, site = Site_ID, pots = Pot_Count, all_cnt = Total_Spot_Count, all_lb = Total_Spot_Wt_KG * 2.20462, propLrg = Proportion_Large, 
@@ -122,19 +129,26 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     write.csv(CL,'output/clByYearSex.csv') 
     
 # Survey-wide CPUE plot ----
-    str(surv)
-    e <- ggplot(data = surv) + theme_classic() + 
-         scale_x_continuous(breaks = seq(1990,2016,2))  +
-         scale_y_continuous(breaks = seq(0,3,.5)) + 
-         labs( x= 'Year', y = 'Mean weight per port (lb)')  
-     e + 
-       geom_point(aes( x = Year, y = CPUE_Large_LB), pch= 19, size = 3) + 
-       geom_line(aes( x = Year, y = CPUE_Large_LB), size = 1) + 
-       geom_point(aes( x = Year, y = CPUE_All_LB), pch= 19, size = 3, col = 'gray50') + 
-       geom_line(aes( x = Year, y = CPUE_All_LB), size = 1, col = 'gray50') 
-
-       # need to add legend. 
+ 
     
+    str(surv)
+    
+    surv %>% select (Year, CPUE_All_LB, CPUE_Large_LB) %>% gather(class, cpue_lb, c(CPUE_Large_LB,CPUE_All_LB)) -> surv_l
+    
+
+    f <-  ggplot(data = surv_l, 
+          aes(x = Year, y = cpue_lb, group = class, colour = class) ) +
+          scale_color_grey(start=.7, end=0.1,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
+          #scale_shape_discrete( start = 19, end = 17, name = '', labels = c("All Sizes", "Larges (>32mm)")) + 
+          theme(legend.position = c(.2,.8)) +
+          scale_x_continuous(breaks = seq(1990,2016,2))  +
+          scale_y_continuous(breaks = seq(0,3,.5)) + 
+          labs( x= 'Year', y = 'Mean weight per pot (lb)') +
+          geom_point(size = 2)+ 
+          geom_line ()
+    f
+      
+    ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.5, width=6.5, units="in")
     
     
     
