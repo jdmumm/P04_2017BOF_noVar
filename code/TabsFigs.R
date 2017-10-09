@@ -37,13 +37,14 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
 # CPUE (ALL_LB) by ShrimpArea and StatArea - both survey and harvest 
 #Aggregate SURVEY ####
   # join statArea and ShrimpArea to CPUE 
-    site %>% select(year,site,pots,all_lb) %>%
+    site %>% select(year,site,pots,all_lb,lrg_lb) %>%  
     left_join (
       siteStatLUT %>% select(-Comments), by = c("site" = "SiteNum")) -> cpueBySite
       
   #by ShrimpArea
     cpueBySite %>% filter(site != 11) %>% group_by (year,ShrimpArea) %>% summarize (    #exclude valdez 
-      cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByArea
+      cpueAllLb = sum(all_lb)/sum(pots), 
+      cpueLrgLb = sum(lrg_lb)/sum(pots)) -> cpueByArea  # added lrg_lbs for plot after writing cpueByArea csv    
     dcast(cpueByArea, year ~ ShrimpArea, value.var = "cpueAllLb") -> cpueByArea_s 
 
   #by StatArea
@@ -129,17 +130,10 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     write.csv(CL,'output/clByYearSex.csv') 
     
 # Survey-wide CPUE plot ----
- 
-    
-    str(surv)
-    
-    surv %>% select (Year, CPUE_All_LB, CPUE_Large_LB) %>% gather(class, cpue_lb, c(CPUE_Large_LB,CPUE_All_LB)) -> surv_l
-    
-
+  surv %>% select (Year, CPUE_All_LB, CPUE_Large_LB) %>% gather(class, cpue_lb, c(CPUE_Large_LB,CPUE_All_LB)) -> surv_l
     f <-  ggplot(data = surv_l, 
           aes(x = Year, y = cpue_lb, group = class, colour = class) ) +
           scale_color_grey(start=.7, end=0.1,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
-          #scale_shape_discrete( start = 19, end = 17, name = '', labels = c("All Sizes", "Larges (>32mm)")) + 
           theme(legend.position = c(.2,.8)) +
           scale_x_continuous(breaks = seq(1990,2016,2))  +
           scale_y_continuous(breaks = seq(0,3,.5)) + 
@@ -150,9 +144,22 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       
     ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.5, width=6.5, units="in")
     
+# CPUE by area plot
+    cpueByArea %>% gather(class, cpue_lb, c(cpueAllLb,cpueLrgLb)) -> cpueByArea_l
+    labels <- c('1' = "Area 1", '2' = "Area 2", '3' = "Area 3")
+    a <-  ggplot(data = cpueByArea_l, 
+                 aes(x = year, y = cpue_lb, group = class, colour = class) ) +
+      scale_color_grey(start=.7, end=0.1,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
+      theme(legend.position = c(.2,.55), legend.background = element_rect (fill = "transparent" )) +
+      scale_x_continuous(breaks = seq(1990,2016,2))  +
+      scale_y_continuous(breaks = seq(0,4,.5)) + 
+      labs( x= 'Year', y = 'Mean weight per pot (lb)') +
+      geom_point(size = 1.5)+ 
+      geom_line ()  +
+      facet_wrap(~ShrimpArea, ncol=1, labeller=labeller(ShrimpArea = labels))
+    a
     
-    
-    
+    ggsave("./figs/areaCPUE_lbs.png", dpi=300, height=6.5, width=6.5, units="in")
     
     
     
