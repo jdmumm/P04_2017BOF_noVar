@@ -84,11 +84,11 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
         siteStatLUT %>% select(SITE_ID=SiteNum,SiteName,StatArea,ShrimpArea)) -> eggsBySite 
     # Aggregate by year and stat area
     eggsBySite %>% group_by(YEAR,StatArea) %>% summarise(
-      perFemWEgg = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggByStat
+      perFemWEgg = round(100*sum(femsWEggs, na.rm = TRUE)/sum(femsWValidEggCode, na.rm = TRUE),2)) -> eggByStat
       dcast(eggByStat, YEAR ~ StatArea, value.var = "perFemWEgg") -> eggByStat
     # Survey wide 
     eggsBySite %>% filter(SITE_ID != 11) %>% group_by(YEAR) %>% summarise(                   # excluding valdez for survey-wide 
-      surveyWide = round(100*sum(femsWEggs)/sum(femsWValidEggCode),2)) -> eggByYear
+      surveyWide = round(100*sum(femsWEggs, na.rm = TRUE)/sum(femsWValidEggCode, na.rm = TRUE),2)) -> eggByYear
     #join by stat area to survey-wide 
     left_join(eggByStat,eggByYear) -> eggsByStatYear  # Percent of females with eggs by stat area and year w surveywide. Vldz excluded from surveywide.
     write.csv(eggsByStatYear,"output/eggByStat.csv")
@@ -161,36 +161,3 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     
     ggsave("./figs/areaCPUE_lbs.png", dpi=300, height=6.5, width=6.5, units="in")
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-############################################################################################    
-############################################################################################    
-# hasty plot of CPUE Alls by area ####
-  par (mfrow = c(3,1))
-  par (pch = 19)
-  plot(cpueByArea[,1],cpueByArea[,2], main = "1", ylim = c(0,10), xlab = "year", ylab = "CPUE ALLs Lbs/pot")
-  plot(cpueByArea[,1],cpueByArea[,3], main = "2", ylim = c(0,10))
-  plot(cpueByArea[,1],cpueByArea[,4], main = "3", ylim = c(0,10))         
-
-  par(mfrow = c(1,1), pch = 19, lwd = 2)  
-  plot(cpueByArea[,1],cpueByArea[,2], main = "CPUE_All_Lbs", ylim = c(0,4), type = "l", col = "red", 
-        xlab = "year", ylab = "CPUE ALLs Lbs/pot")
-  lines(cpueByArea[,1],cpueByArea[,3], col = "purple") 
-  lines(cpueByArea[,1],cpueByArea[,4], col = "blue")
-legend ("topleft", lwd = 2,  c("1","2","3"), col = c("red","purple", "blue"))
-  
-  
-  
