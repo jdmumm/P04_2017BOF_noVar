@@ -28,7 +28,9 @@ cpp %>% transmute(year = Year,
       mu_all_cnt = tau_all_cnt/N,
       mu_all_kg = tau_all_kg/N,  
       var_all_cnt = sum((all_cnt - mu_all_cnt)^2)/N,
-      var_all_kg = sum((all_kg - mu_all_kg)^2)/N )  -> all_byYear
+      var_all_kg = sum((all_kg - mu_all_kg)^2)/N ,
+      cv_all_cnt = 100* (var_all_cnt^.5)/mu_all_cnt, 
+      cv_all_kg = 100* (var_all_kg^.5)/mu_all_kg) -> all_byYear
   #bySite
   cpp %>% group_by(year, Site) %>% 
     summarise ( 
