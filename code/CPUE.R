@@ -54,7 +54,7 @@ cpp %>% transmute(year = Year,
         tau_lrg_cnt = mu_lrg_cnt * N,
         tau_lrg_kg =  mu_lrg_kg * N, 
         var_rh_cnt = sum(((lrg_cnt - rh_cnt*all_cnt)^2), na.rm = T)/(n-1),
-        var_rh_kg  = sum(((lrg_kg - rh_cnt*all_kg)^2), na.rm = T)/(n-1), 
+        var_rh_kg  = sum(((lrg_kg - rh_kg*all_kg)^2), na.rm = T)/(n-1), 
         var_mu_lrg_cnt = (N - n)/(N) * (var_rh_cnt/n), 
         var_mu_lrg_kg = (N - n)/(N) * (var_rh_kg/n), 
         var_tau_lrg_cnt = var_mu_lrg_cnt * N^2,
@@ -77,8 +77,9 @@ cpp %>% transmute(year = Year,
     options(scipen = 999)
     
     read.csv("data/surveyWide_from16SS.csv") -> surv
-    surv %>% left_join(large_byYear, by = c('Year' = 'year')) -> comp
-    comp %>% transmute(Year, Pot_Count, N, Est_Wt_Large, round(tau_lrg_kg,2), CPUE_Large_KG, round(mu_lrg_kg,2) )
+    surv %>% left_join(large_byYear, by = c('Year' = 'year')) %>% left_join(all_byYear, by = c('Year' = 'year')) -> comp
+    comp %>% transmute(Year, Pot_Count, N.x, Est_Wt_Large, round(tau_lrg_kg,2), CPUE_Large_KG, round(mu_lrg_kg,2),
+                       Total_Spot_Wt_KG, round(tau_all_kg,2), CPUE_All_KG, round(mu_all_kg,2))
     
     
     
