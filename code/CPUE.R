@@ -57,8 +57,8 @@ cpp %>% transmute(year = Year,
         tau_lrg_kg =  mu_lrg_kg * N, 
         var_rh_cnt = sum(((lrg_cnt - rh_cnt*all_cnt)^2), na.rm = T)/(n-1),
         var_rh_kg  = sum(((lrg_kg - rh_kg*all_kg)^2), na.rm = T)/(n-1), 
-        var_mu_lrg_cnt = (N - n)/(N) * (var_rh_cnt/n), 
-        var_mu_lrg_kg = (N - n)/(N) * (var_rh_kg/n), 
+        var_mu_lrg_cnt =(var_rh_cnt/n), 
+        var_mu_lrg_kg = (var_rh_kg/n), 
         var_tau_lrg_cnt = var_mu_lrg_cnt * N^2,
         var_tau_lrg_kg = var_mu_lrg_kg * N^2) -> large_bySite           
   
