@@ -60,7 +60,9 @@ cpp %>% transmute(year = Year,
         var_mu_lrg_cnt =(var_rh_cnt/n), 
         var_mu_lrg_kg = (var_rh_kg/n), 
         var_tau_lrg_cnt = var_mu_lrg_cnt * N^2,
-        var_tau_lrg_kg = var_mu_lrg_kg * N^2) -> large_bySite           
+        var_tau_lrg_kg = var_mu_lrg_kg * N^2,
+        cv_lrg_cnt = 100* (var_rh_cnt^.5)/mu_lrg_cnt, 
+        cv_all_kg = 100* (var_rh_kg^.5)/mu_lrg_kg) -> large_bySite           
   
   #byYear 
     large_bySite %>% filter (Site != "11") %>% group_by (year) %>% 
@@ -73,7 +75,9 @@ cpp %>% transmute(year = Year,
         var_tau_lrg_cnt = sum(var_tau_lrg_cnt), 
         var_tau_lrg_kg  = sum(var_tau_lrg_kg), 
         var_mu_lrg_cnt = var_tau_lrg_cnt/(N^2),
-        var_mu_lrg_kg  = var_tau_lrg_kg/(N^2)) -> large_byYear
+        var_mu_lrg_kg  = var_tau_lrg_kg/(N^2),
+        cv_lrg_cnt = 100* (var_tau_lrg_cnt^.5)/mu_lrg_cnt, 
+        cv_all_kg = 100* (var_tau_lrg_kg^.5)/mu_lrg_kg ) -> large_byYear
 ###############################################################################################
 ## errror checking.  compare to old output  Not Complete----
     options(scipen = 999)
