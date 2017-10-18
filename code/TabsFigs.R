@@ -116,13 +116,19 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
         right_join (awl)   %>% 
         filter (site != 11, !Station %in% c("E","E1","E2"), 
                 perf == 1, species == 965, sex %in% c(1,2)  ) -> awls   # excluding transitionals 
-  
+      #sexes split 
       awls %>% group_by(year, sex) %>% summarise(   # there is issue where freq = 2 in 2005 for males, but since grouping by sex and almost all males in 2005 were 2, ok as is 
         n = n(),   
         len = mean (cl), 
         sd = var(cl)^.5,
         se = sd/(n^.5))-> meanLen
-     
+      #sexes combined 
+      awls %>% group_by(year) %>% summarise(    
+        n = n(),   
+        len = mean (cl), 
+        sd = var(cl)^.5,
+        se = sd/(n^.5))-> meanLen_bth 
+      
       meanLen %>% select (year, sex, len) %>% spread(sex,len) -> cl
       meanLen %>% select (year, sex, n) %>% spread(sex,n) -> n 
       meanLen %>% select (year, sex, sd) %>% spread(sex,sd) -> sd 
@@ -132,30 +138,71 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       #write.csv(CL,'output/clByYearSex.csv') 
    
     #By Area
+      #sexes split ----
       awls %>% left_join (siteStatLUT, by = c('site' ='SiteNum')) -> awls
       awls %>% group_by(ShrimpArea, year, sex) %>% summarise(   
         n = n(),   
         len = mean (cl), 
         sd = var(cl)^.5,
         se = sd/(n^.5))-> meanLen_byArea
-    
+      #sexes combined -----
+      awls %>% group_by(ShrimpArea, year) %>% summarise(   
+        n = n(),   
+        len = mean (cl), 
+        sd = var(cl)^.5,
+        se = sd/(n^.5))-> meanLen_byArea_bth
+      
+      
+      #Plot mean length 
+      meanLen$Sex <- as.factor(meanLen$sex)
+      meanLen_byArea$Sex <- as.factor(meanLen_byArea$sex)
+      # sexes split ----
+         y <- ggplot(data = meanLen,
+              aes (x=year, y = len, group = Sex, colour = Sex)) +
+              scale_x_continuous(breaks = seq(1990,2016,2))  +      
+              geom_point()+
+              geom_line()
+        
+        a <- ggplot(data = meanLen_byArea,
+              aes (x=year, y = len, group = Sex, colour = Sex)) +
+              scale_x_continuous(breaks = seq(1990,2016,2))  +      
+              geom_point()+
+              geom_line()+ 
+              facet_wrap(~ShrimpArea)
+      # sexes combined ----
+        Y <- ggplot(data = meanLen_bth,
+                    aes (x=year, y = len)) +
+          scale_x_continuous(breaks = seq(1990,2016,2))  +      
+          scale_y_continuous(breaks = seq(28,34,1)) +
+          labs( x= 'Year', y = 'Mean CL (mm)') +
+          geom_point(size = 2)+
+          geom_line()+
+          geom_errorbar(aes(ymin=len-se, ymax=len+se, width = .5))
+        Y
+        ggsave("./figs/surveyWideCL.png", dpi=300, height=4., width=6.5, units="in")       
+        A <- ggplot(data = meanLen_byArea_bth,
+                    aes (x=year, y = len)) +
+          scale_x_continuous(breaks = seq(1990,2016,2))  +      
+          geom_point()+
+          geom_line()+ 
+          facet_wrap(~ShrimpArea)
 # Survey-wide CPUE plot ----
   surv %>% select (Year, CPUE_All_LB, CPUE_Large_LB) %>% gather(class, cpue_lb, c(CPUE_Large_LB,CPUE_All_LB)) -> surv_l
     surv_l %>% group_by(class) %>% mutate (avg = mean(cpue_lb, na.rm = TRUE)) -> surv_l # calc longterm avgs
     
       f <-  ggplot(data = surv_l, 
           aes(x = Year, y = cpue_lb, group = class, colour = class) ) +
-          scale_color_grey(start=.7, end=0.1,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
+          scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
           theme(legend.position = c(.2,.8)) +
           scale_x_continuous(breaks = seq(1990,2016,2))  +
           scale_y_continuous(breaks = seq(0,3,.5)) + 
           labs( x= 'Year', y = 'Mean weight per pot (lb)') +
           geom_point(size = 2)+ 
           geom_line () +
-          geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.1,.7)), lty = 'dashed')
+          geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.5,.1)), lty = 'dashed')
         f
       
-    #ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.5, width=6.5, units="in")
+    ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.0, width=6.5, units="in")
     
 # CPUE by area plot ----
     cpueByArea %>% gather(class, cpue_lb, c(cpueAllLb,cpueLrgLb)) -> cpueByArea_l
