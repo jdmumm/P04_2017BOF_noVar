@@ -177,15 +177,25 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
           labs( x= 'Year', y = 'Mean CL (mm)') +
           geom_point(size = 2)+
           geom_line()+
-          geom_errorbar(aes(ymin=len-se, ymax=len+se, width = .5))
+          geom_errorbar(aes(ymin=len-se, ymax=len+se, width = .5)) + 
+          geom_hline(yintercept = mean(meanLen_bth$len, na.rm=T),lty = 'dashed')
         Y
         #ggsave("./figs/surveyWideCL.png", dpi=300, height=4., width=6.5, units="in")       
+        meanLen_byArea_bth %>% group_by(ShrimpArea) %>% summarise(avg = mean(len, na.rm = TRUE)) -> avgs
+        labels <- c('1' = "Area 1", '2' = "Area 2", '3' = "Area 3")
         A <- ggplot(data = meanLen_byArea_bth,
                     aes (x=year, y = len)) +
           scale_x_continuous(breaks = seq(1990,2016,2))  +      
+          theme( axis.text.x  = element_text(angle=90, vjust=0.5)) +
+          scale_y_continuous(breaks = seq(27,38,1)) +
+          labs( x= 'Year', y = 'Mean CL (mm)')+
           geom_point()+
           geom_line()+ 
-          facet_wrap(~ShrimpArea)
+          facet_wrap(~ShrimpArea, labeller=labeller(ShrimpArea = labels)) +
+          geom_errorbar(aes(ymin=len-se, ymax=len+se, width = .5))+
+          geom_hline(aes(yintercept = avg) , avgs, lty = 'dashed')
+        A
+        ggsave("./figs/areaCL.png", dpi=300, height=2.9, width=9, units="in")
 # Survey-wide CPUE plot ----
   surv %>% select (Year, CPUE_All_LB, CPUE_Large_LB) %>% gather(class, cpue_lb, c(CPUE_Large_LB,CPUE_All_LB)) -> surv_l
     surv_l %>% group_by(class) %>% mutate (avg = mean(cpue_lb, na.rm = TRUE)) -> surv_l # calc longterm avgs
@@ -213,7 +223,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     a <-  ggplot(data = cpueByArea_l, 
                  aes(x = year, y = cpue_lb, group = class, colour = class) ) +
       scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
-      theme(legend.position = c(.85,.7), legend.background = element_rect (fill = "transparent" )) +
+      theme(legend.position = c(.85,.8), legend.background = element_rect (fill = "transparent" )) +
       scale_x_continuous(breaks = seq(1990,2016,2))  +
       scale_y_continuous(breaks = seq(0,4,.5)) + 
       labs( x= 'Year', y = 'Mean weight per pot (lb)') +
@@ -225,7 +235,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     a + 
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
     
-    #ggsave("./figs/areaCPUE_lbs_w.png", dpi=300, height=6.5, width=6.5, units="in")
+    ggsave("./figs/areaCPUE_lbs_w.png", dpi=300, height=2.9, width=9, units="in")
 
     
         
