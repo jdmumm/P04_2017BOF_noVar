@@ -110,7 +110,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
          # this matches PropSexForBOF report table, except that some years are null here.  Plan to just copy and paste
          # prop sex and prop fem data from BOF table to the other main survey summary table. 
 
-# Biological - calc mean length by year and sex. 
+# Biological - calc mean length by year and sex.  ----
     pp %>% select(Event, site, Station, pot, perf) %>%   
       right_join (awl)   %>% 
       filter (site != 11, !Station %in% c("E","E1","E2"), 
@@ -147,7 +147,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       
     #ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.5, width=6.5, units="in")
     
-# CPUE by area plot
+# CPUE by area plot ----
     cpueByArea %>% gather(class, cpue_lb, c(cpueAllLb,cpueLrgLb)) -> cpueByArea_l
     
     cpueByArea_l %>% group_by(class, ShrimpArea) %>% summarise (avg = mean(cpue_lb, na.rm = TRUE))-> avgs # calc longterm avgs
@@ -168,4 +168,37 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.7,.1)),3), lty = 'dashed')
     
     #ggsave("./figs/areaCPUE_lbs.png", dpi=300, height=6.5, width=6.5, units="in")
+
     
+        
+# Histograms ----
+
+awl %>% select(Event, site, Station, pot, year,species, sex, freq, cl) -> awl 
+pp %>% select(Event, pot,perf) -> pp 
+left_join(awl, pp) %>%
+filter (site != 11, Station %in% c('A','B','C','D','X','Y','Z'), species == 965, perf == 1) -> awl
+
+# Replicate freq 2s - these are from 2005, when only half males were measured. 
+awl %>% filter(freq == 2) -> twos
+rbind(awl,twos) -> awl
+awl$freq <- 1
+awl %>% mutate(Sex = as.factor(sex)) -> awl 
+awl %>% left_join (siteStatLUT, by = c('site' ='SiteNum')) -> awl 
+
+#histogram 
+#survey-wide 
+ awl %>% filter  (Sex == '1' | Sex == '2') %>% 
+    ggplot(aes(cl, fill = sex)) +
+    scale_fill_manual(values=c("#bdbdbd", "#636363")) +
+    geom_histogram(alpha=.8, bins=60, color = 1)+
+    facet_wrap(~year, ncol = 1, dir = 'v', strip.position="right", scale='free_y')+
+    #geom_density(alpha = .1) +
+    theme(panel.spacing.y = unit(0, "lines"))  
+#byArea  
+  awl %>% filter  (Sex == '1' | Sex == '2') %>% 
+    ggplot(aes(cl, fill = sex)) +
+    scale_fill_manual(values=c("#bdbdbd", "#636363")) +
+    geom_histogram(aes(y = (..count..)/tapply(..count..,..PANEL..,sum)[..PANEL..]),alpha=.8, bins=50, color = 1)+
+    facet_grid(year ~ ShrimpArea, scale='free_y')+
+    #geom_density(alpha = .1) +
+    theme(panel.spacing.y = unit(0, "lines"),panel.spacing.x = unit(0, "lines")) 
