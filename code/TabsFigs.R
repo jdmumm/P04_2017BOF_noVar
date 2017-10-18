@@ -179,7 +179,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
           geom_line()+
           geom_errorbar(aes(ymin=len-se, ymax=len+se, width = .5))
         Y
-        ggsave("./figs/surveyWideCL.png", dpi=300, height=4., width=6.5, units="in")       
+        #ggsave("./figs/surveyWideCL.png", dpi=300, height=4., width=6.5, units="in")       
         A <- ggplot(data = meanLen_byArea_bth,
                     aes (x=year, y = len)) +
           scale_x_continuous(breaks = seq(1990,2016,2))  +      
@@ -202,7 +202,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
           geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.5,.1)), lty = 'dashed')
         f
       
-    ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.0, width=6.5, units="in")
+    #ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.0, width=6.5, units="in")
     
 # CPUE by area plot ----
     cpueByArea %>% gather(class, cpue_lb, c(cpueAllLb,cpueLrgLb)) -> cpueByArea_l
@@ -212,19 +212,20 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     labels <- c('1' = "Area 1", '2' = "Area 2", '3' = "Area 3")
     a <-  ggplot(data = cpueByArea_l, 
                  aes(x = year, y = cpue_lb, group = class, colour = class) ) +
-      scale_color_grey(start=.7, end=0.1,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
-      theme(legend.position = c(.2,.55), legend.background = element_rect (fill = "transparent" )) +
+      scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
+      theme(legend.position = c(.85,.7), legend.background = element_rect (fill = "transparent" )) +
       scale_x_continuous(breaks = seq(1990,2016,2))  +
       scale_y_continuous(breaks = seq(0,4,.5)) + 
       labs( x= 'Year', y = 'Mean weight per pot (lb)') +
       geom_point(size = 1.5)+ 
       geom_line ()  +
-      facet_wrap(~ShrimpArea, ncol=1, labeller=labeller(ShrimpArea = labels))
+      theme( axis.text.x  = element_text(angle=90, vjust=0.5)) +
+      facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels))
     
     a + 
-      geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.7,.1)),3), lty = 'dashed')
+      geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
     
-    #ggsave("./figs/areaCPUE_lbs.png", dpi=300, height=6.5, width=6.5, units="in")
+    #ggsave("./figs/areaCPUE_lbs_w.png", dpi=300, height=6.5, width=6.5, units="in")
 
     
         
