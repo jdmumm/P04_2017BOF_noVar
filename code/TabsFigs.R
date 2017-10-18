@@ -34,8 +34,8 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
 
 ## ASSEMBLE TABLES ON JRs LIST ####
 
-# CPUE (ALL_LB) by ShrimpArea and StatArea - both survey and harvest 
-#Aggregate SURVEY ####
+# CPUE (ALL_LB) by ShrimpArea and StatArea - both survey and harvest ----
+#Aggregate SURVEY 
   # join statArea and ShrimpArea to CPUE 
     site %>% select(year,site,pots,all_lb,lrg_lb) %>%  
     left_join (
@@ -52,7 +52,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       cpueAllLb = sum(all_lb)/sum(pots)) -> cpueByStat  
     dcast(cpueByStat, year ~ StatArea, value.var = "cpueAllLb" ) -> cpueByStat_s
 
-# Aggregate HARVEST ####   
+# Aggregate HARVEST    
   # join shrimpArea to harvest
     harv %>% left_join (yearAreaLUT) %>% 
       na.omit -> harv #exclude those 814 records with null effort
@@ -66,7 +66,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       cpueAllLb = sum(lbs)/sum(pots)) -> cpueByStat  
     dcast(cpueByStat, year ~ stat, value.var = "cpueAllLb" ) -> cpueByStat_h
 
-# Join HARVEST to SURVEY and write ####
+# Join HARVEST to SURVEY and write 
   #by ShrimpArea
     left_join(cpueByArea_s,cpueByArea_h, by = "year", suffix = c("_s","_h")) -> cpueByArea
     #write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
@@ -77,7 +77,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       select(order(colnames(.)))  -> cpueByStat
       #write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
 
-# prop egg bearing by stat ####   
+# prop egg bearing by stat ----   
     # join statArea to propEggBearing 
     egg %>% select(YEAR,SITE_ID,males,fems,femsWEggs,femsWValidEggCode) %>%
       left_join (
@@ -92,7 +92,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     #join by stat area to survey-wide 
     left_join(eggByStat,eggByYear) -> eggsByStatYear  # Percent of females with eggs by stat area and year w surveywide. Vldz excluded from surveywide.
     #write.csv(eggsByStatYear,"output/eggByStat.csv")
-# Main Survey Summary Table ####
+# Main Survey Summary Table ----
     surv %>% transmute (Year, Pots = Pot_Count,
                         all_lb =  Total_Spot_Wt_KG  * 2.20462 ,
                         all_cnt = Total_Spot_Count, 
@@ -111,23 +111,33 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
          # prop sex and prop fem data from BOF table to the other main survey summary table. 
 
 # Biological - calc mean length by year and sex.  ----
-    pp %>% select(Event, site, Station, pot, perf) %>%   
-      right_join (awl)   %>% 
-      filter (site != 11, !Station %in% c("E","E1","E2"), 
-              perf == 1, species == 965, sex %in% c(1,2)  ) -> awls   # excluding transitionals 
-    
-    awls %>% group_by(year, sex) %>% summarise(   # there is issue where freq = 2 in 2005 for males, but since grouping by sex and almost all males in 2005 were 2, ok as is 
-      n = n(),   
-      len = mean (cl), 
-      sd = var(cl)^.5) -> meanLen
+    #Survey-wide
+        pp %>% select(Event, site, Station, pot, perf) %>%   
+        right_join (awl)   %>% 
+        filter (site != 11, !Station %in% c("E","E1","E2"), 
+                perf == 1, species == 965, sex %in% c(1,2)  ) -> awls   # excluding transitionals 
+  
+      awls %>% group_by(year, sex) %>% summarise(   # there is issue where freq = 2 in 2005 for males, but since grouping by sex and almost all males in 2005 were 2, ok as is 
+        n = n(),   
+        len = mean (cl), 
+        sd = var(cl)^.5,
+        se = sd/(n^.5))-> meanLen
+     
+      meanLen %>% select (year, sex, len) %>% spread(sex,len) -> cl
+      meanLen %>% select (year, sex, n) %>% spread(sex,n) -> n 
+      meanLen %>% select (year, sex, sd) %>% spread(sex,sd) -> sd 
+      
+      left_join (n,cl, by = 'year') %>% left_join(sd, by = 'year') -> CL
+      colnames(CL) <- c('Year','n_m', 'n_f', 'cl_m', 'cl_f', 'sd_m', 'sd_f')
+      #write.csv(CL,'output/clByYearSex.csv') 
    
-    meanLen %>% select (year, sex, len) %>% spread(sex,len) -> cl
-    meanLen %>% select (year, sex, n) %>% spread(sex,n) -> n 
-    meanLen %>% select (year, sex, sd) %>% spread(sex,sd) -> sd 
-    
-    left_join (n,cl, by = 'year') %>% left_join(sd, by = 'year') -> CL
-    colnames(CL) <- c('Year','n_m', 'n_f', 'cl_m', 'cl_f', 'sd_m', 'sd_f')
-    #write.csv(CL,'output/clByYearSex.csv') 
+    #By Area
+      awls %>% left_join (siteStatLUT, by = c('site' ='SiteNum')) -> awls
+      awls %>% group_by(ShrimpArea, year, sex) %>% summarise(   
+        n = n(),   
+        len = mean (cl), 
+        sd = var(cl)^.5,
+        se = sd/(n^.5))-> meanLen_byArea
     
 # Survey-wide CPUE plot ----
   surv %>% select (Year, CPUE_All_LB, CPUE_Large_LB) %>% gather(class, cpue_lb, c(CPUE_Large_LB,CPUE_All_LB)) -> surv_l
@@ -176,7 +186,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
 awl %>% select(Event, site, Station, pot, year,species, sex, freq, cl) -> awl 
 pp %>% select(Event, pot,perf) -> pp 
 left_join(awl, pp) %>%
-filter (site != 11, Station %in% c('A','B','C','D','X','Y','Z'), species == 965, perf == 1) -> awl
+filter (site != 11, Station %in% c('A','B','C','D','W','X','Y','Z'), species == 965, perf == 1) -> awl
 
 # Replicate freq 2s - these are from 2005, when only half males were measured. 
 awl %>% filter(freq == 2) -> twos
