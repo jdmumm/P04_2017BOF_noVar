@@ -240,7 +240,6 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     
         
 # Histograms ----
-
 awl %>% select(Event, site, Station, pot, year,species, sex, freq, cl) -> awl 
 pp %>% select(Event, pot,perf) -> pp 
 left_join(awl, pp) %>%
@@ -270,3 +269,27 @@ awl %>% left_join (siteStatLUT, by = c('site' ='SiteNum')) -> awl
     facet_grid(year ~ ShrimpArea, scale='free_y')+
     #geom_density(alpha = .1) +
     theme(panel.spacing.y = unit(0, "lines"),panel.spacing.x = unit(0, "lines")) 
+
+# sex ratio ###
+# survey-wide
+awl %>% filter (sex %in% c(1,2)) %>% group_by(year,sex) %>% summarise(cnt =  sum(freq)) -> sx
+sx %>% spread(sex, cnt) -> wid 
+colnames(wid) <- c('year','m','f')
+wid %>% group_by(year) %>% summarise (pf = f/(m+f)) -> pfem
+
+pfem %>% ggplot (aes(x = year, y = pf))+ 
+  geom_point()+ 
+  geom_line()
+
+#byArea
+awl %>% filter (sex %in% c(1,2)) %>% group_by(ShrimpArea, year,sex) %>%
+  summarise(cnt =  sum(freq)) -> sx
+sx %>% spread(sex, cnt) -> wid 
+colnames(wid) <- c('area','year','m','f')
+wid %>% group_by(area, year) %>% summarise (pf = f/(m+f)) -> pfem
+
+pfem %>% ggplot (aes(x = year, y = pf))+ 
+  geom_point()+ 
+  geom_line() + 
+  facet_wrap(~area, ncol = 1)
+
