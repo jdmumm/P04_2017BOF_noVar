@@ -145,10 +145,13 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
           geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.1,.7)), lty = 'dashed')
         f
       
-    ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.5, width=6.5, units="in")
+    #ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.5, width=6.5, units="in")
     
 # CPUE by area plot
     cpueByArea %>% gather(class, cpue_lb, c(cpueAllLb,cpueLrgLb)) -> cpueByArea_l
+    
+    cpueByArea_l %>% group_by(class, ShrimpArea) %>% summarise (avg = mean(cpue_lb, na.rm = TRUE))-> avgs # calc longterm avgs
+    
     labels <- c('1' = "Area 1", '2' = "Area 2", '3' = "Area 3")
     a <-  ggplot(data = cpueByArea_l, 
                  aes(x = year, y = cpue_lb, group = class, colour = class) ) +
@@ -160,7 +163,9 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       geom_point(size = 1.5)+ 
       geom_line ()  +
       facet_wrap(~ShrimpArea, ncol=1, labeller=labeller(ShrimpArea = labels))
-    a
     
-    ggsave("./figs/areaCPUE_lbs.png", dpi=300, height=6.5, width=6.5, units="in")
+    a + 
+      geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.7,.1)),3), lty = 'dashed')
+    
+    #ggsave("./figs/areaCPUE_lbs.png", dpi=300, height=6.5, width=6.5, units="in")
     
