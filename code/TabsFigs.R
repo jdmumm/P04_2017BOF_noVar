@@ -91,7 +91,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       surveyWide = round(100*sum(femsWEggs, na.rm = TRUE)/sum(femsWValidEggCode, na.rm = TRUE),2)) -> eggByYear
     #join by stat area to survey-wide 
     left_join(eggByStat,eggByYear) -> eggsByStatYear  # Percent of females with eggs by stat area and year w surveywide. Vldz excluded from surveywide.
-    write.csv(eggsByStatYear,"output/eggByStat.csv")
+    #write.csv(eggsByStatYear,"output/eggByStat.csv")
 # Main Survey Summary Table ####
     surv %>% transmute (Year, Pots = Pot_Count,
                         all_lb =  Total_Spot_Wt_KG  * 2.20462 ,
@@ -102,7 +102,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
                         lrg_cnt = Est_Ct_LG, 
                         lrg_cpue_lb = CPUE_Large_LB, 
                         lrg_cpue_cnt = CPUE_Large_Count) -> main
-    write.csv(main,"output/main.csv")
+    #write.csv(main,"output/main.csv")
 # calculate prop sex and prop egg bearing
     # eggsBySite %>% filter(SITE_ID != 11) %>% group_by(YEAR) %>% summarise(                   # excluding valdez for survey-wide 
     #   surveyWidePropFem = round(100 * sum(fems)/(sum(males)+sum(fems)),1),
@@ -127,11 +127,13 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     
     left_join (n,cl, by = 'year') %>% left_join(sd, by = 'year') -> CL
     colnames(CL) <- c('Year','n_m', 'n_f', 'cl_m', 'cl_f', 'sd_m', 'sd_f')
-    write.csv(CL,'output/clByYearSex.csv') 
+    #write.csv(CL,'output/clByYearSex.csv') 
     
 # Survey-wide CPUE plot ----
   surv %>% select (Year, CPUE_All_LB, CPUE_Large_LB) %>% gather(class, cpue_lb, c(CPUE_Large_LB,CPUE_All_LB)) -> surv_l
-    f <-  ggplot(data = surv_l, 
+    surv_l %>% group_by(class) %>% mutate (avg = mean(cpue_lb, na.rm = TRUE)) -> surv_l # calc longterm avgs
+    
+      f <-  ggplot(data = surv_l, 
           aes(x = Year, y = cpue_lb, group = class, colour = class) ) +
           scale_color_grey(start=.7, end=0.1,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
           theme(legend.position = c(.2,.8)) +
@@ -139,8 +141,9 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
           scale_y_continuous(breaks = seq(0,3,.5)) + 
           labs( x= 'Year', y = 'Mean weight per pot (lb)') +
           geom_point(size = 2)+ 
-          geom_line ()
-    f
+          geom_line () +
+          geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.1,.7)), lty = 'dashed')
+        f
       
     ggsave("./figs/surveyWideCPUE_lbs.png", dpi=300, height=4.5, width=6.5, units="in")
     
