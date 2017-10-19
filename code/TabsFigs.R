@@ -271,13 +271,19 @@ awl %>% filter  (Sex %in% c('1','2')) %>%
 #ggsave("./figs/CL_Hist_surv.png", dpi=300, height=8.7, width=6.5, units="in")
 #byArea  
   awl %>% filter  (Sex == '1' | Sex == '2') %>% 
-    ggplot(aes(cl, fill = sex)) +
-    scale_fill_manual(values=c("#bdbdbd", "#636363")) +
-    geom_histogram(aes(y = (..count..)/tapply(..count..,..PANEL..,sum)[..PANEL..]),alpha=.8, bins=50, color = 1)+
-    facet_grid(year ~ ShrimpArea, scale='free_y')+
-    #geom_density(alpha = .1) +
-    theme(panel.spacing.y = unit(0, "lines"),panel.spacing.x = unit(0, "lines")) 
-
+    ggplot(aes(cl, fill = Sex)) +
+    scale_fill_manual(values=c("#bdbdbd", "#636363"), labels = c('Male','Female'), 
+                      guide = guide_legend(direction = "horizontal")) +   
+    geom_histogram(aes(y = ..count.. / sapply(PANEL, FUN=function(x) sum(count[PANEL == x]))),
+                   alpha=.8, bins=60, color = 1)+
+    facet_grid(year ~ ShrimpArea, scale='free_y',labeller=labeller(ShrimpArea = labels)) +
+    scale_x_continuous(breaks = seq(10,55,5), limits = c(15,55))+
+    ylab("Proportion")+
+    scale_y_continuous(breaks = seq(.02,.06,.04)) +
+    xlab("Carapace Length (mm)")+
+    theme(panel.spacing.y = unit(0, "lines"), legend.title=element_blank(), 
+          legend.position = c(.87,-.04), legend.background = element_rect (fill = "transparent" )) 
+  #ggsave("./figs/CL_Hist_area.png", dpi=300, height=8.7, width=6.5, units="in")
 # sex ratio ----
 # survey-wide
 awl %>% filter (sex %in% c(1,2)) %>% group_by(year,sex) %>% summarise(cnt =  sum(freq)) -> sx
