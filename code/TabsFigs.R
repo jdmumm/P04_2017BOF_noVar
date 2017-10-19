@@ -250,17 +250,25 @@ awl %>% filter(freq == 2) -> twos
 rbind(awl,twos) -> awl
 awl$freq <- 1
 awl %>% mutate(Sex = as.factor(sex)) -> awl 
+awl %>% mutate(Year = as.factor(year)) -> awl 
 awl %>% left_join (siteStatLUT, by = c('site' ='SiteNum')) -> awl 
 
-#histogram 
+#histograms ----
 #survey-wide 
- awl %>% filter  (Sex == '1' | Sex == '2') %>% 
-    ggplot(aes(cl, fill = sex)) +
-    scale_fill_manual(values=c("#bdbdbd", "#636363")) +
-    geom_histogram(alpha=.8, bins=60, color = 1)+
-    facet_wrap(~year, ncol = 1, dir = 'v', strip.position="right", scale='free_y')+
-    #geom_density(alpha = .1) +
-    theme(panel.spacing.y = unit(0, "lines"))  
+awl %>% filter  (Sex %in% c('1','2')) %>% 
+  ggplot(aes(cl, fill = Sex ))+ 
+  scale_fill_manual(values=c("#bdbdbd", "#636363"), labels = c('Male','Female'), 
+                    guide = guide_legend(direction = "horizontal")) +
+  facet_wrap(~year, ncol = 1, dir = 'v', strip.position="right", scale='free_y')+
+  geom_histogram(aes(y = ..count.. / sapply(PANEL, FUN=function(x) sum(count[PANEL == x]))),
+                 alpha=.8, bins=60, color = 1)+
+  ylab("Proportion")+
+  scale_y_continuous(breaks = seq(.01,.04,.03)) +
+  xlab("Carapace Length (mm)")+
+  scale_x_continuous(breaks = seq(10,55,5), limits = c(15,55))+
+  theme(panel.spacing.y = unit(0, "lines"), legend.title=element_blank(), 
+        legend.position = c(.87,-.04), legend.background = element_rect (fill = "transparent" ))          
+#ggsave("./figs/CL_Hist_surv.png", dpi=300, height=8.7, width=6.5, units="in")
 #byArea  
   awl %>% filter  (Sex == '1' | Sex == '2') %>% 
     ggplot(aes(cl, fill = sex)) +
@@ -270,7 +278,7 @@ awl %>% left_join (siteStatLUT, by = c('site' ='SiteNum')) -> awl
     #geom_density(alpha = .1) +
     theme(panel.spacing.y = unit(0, "lines"),panel.spacing.x = unit(0, "lines")) 
 
-# sex ratio ###
+# sex ratio ----
 # survey-wide
 awl %>% filter (sex %in% c(1,2)) %>% group_by(year,sex) %>% summarise(cnt =  sum(freq)) -> sx
 sx %>% spread(sex, cnt) -> wid 
@@ -292,4 +300,3 @@ pfem %>% ggplot (aes(x = year, y = pf))+
   geom_point()+ 
   geom_line() + 
   facet_wrap(~area, ncol = 1)
-
