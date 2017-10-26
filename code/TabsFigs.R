@@ -132,9 +132,10 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       meanLen %>% select (year, sex, len) %>% spread(sex,len) -> cl
       meanLen %>% select (year, sex, n) %>% spread(sex,n) -> n 
       meanLen %>% select (year, sex, sd) %>% spread(sex,sd) -> sd 
-      
-      left_join (n,cl, by = 'year') %>% left_join(sd, by = 'year') -> CL
-      colnames(CL) <- c('Year','n_m', 'n_f', 'cl_m', 'cl_f', 'sd_m', 'sd_f')
+      meanLen %>% select (year, sex, se) %>% spread(sex,se) -> se 
+       
+      left_join (n,cl, by = 'year') %>% left_join(se, by = 'year') -> CL
+      colnames(CL) <- c('Year','n_m', 'n_f', 'cl_m', 'cl_f', 'se_m', 'se_f')
       #write.csv(CL,'output/clByYearSex.csv') 
    
     #By Area
@@ -195,7 +196,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
           geom_errorbar(aes(ymin=len-se, ymax=len+se, width = .5))+
           geom_hline(aes(yintercept = avg) , avgs, lty = 'dashed')
         A
-        ggsave("./figs/areaCL.png", dpi=300, height=2.9, width=9, units="in")
+        #ggsave("./figs/areaCL.png", dpi=300, height=2.9, width=9, units="in")
 # Survey-wide CPUE plot ----
   surv %>% select (Year, CPUE_All_LB, CPUE_Large_LB) %>% gather(class, cpue_lb, c(CPUE_Large_LB,CPUE_All_LB)) -> surv_l
     surv_l %>% group_by(class) %>% mutate (avg = mean(cpue_lb, na.rm = TRUE)) -> surv_l # calc longterm avgs
@@ -218,6 +219,10 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     cpueByArea %>% gather(class, cpue_lb, c(cpueAllLb,cpueLrgLb)) -> cpueByArea_l
     
     cpueByArea_l %>% group_by(class, ShrimpArea) %>% summarise (avg = mean(cpue_lb, na.rm = TRUE))-> avgs # calc longterm avgs
+        #Specific values included in resultes
+          cpueByArea_l %>% filter (ShrimpArea == '1', class == 'cpueLrgLb', year > 2004) %>% group_by(ShrimpArea) %>% summarise (avg =  mean(cpue_lb, na.rm = T))
+          cpueByArea_l %>% filter (ShrimpArea == '1', class == 'cpueLrgLb', year < 2004) %>% group_by(ShrimpArea) %>% summarise (avg =  mean(cpue_lb, na.rm = T))
+          cpueByArea_l %>% filter (class == 'cpueAllLb') %>% group_by(ShrimpArea) %>% summarise (avg =  mean(cpue_lb, na.rm = T))
     
     labels <- c('1' = "Area 1", '2' = "Area 2", '3' = "Area 3")
     a <-  ggplot(data = cpueByArea_l, 
@@ -235,7 +240,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     a + 
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
     
-    ggsave("./figs/areaCPUE_lbs_w.png", dpi=300, height=2.9, width=9, units="in")
+    #ggsave("./figs/areaCPUE_lbs_w.png", dpi=300, height=2.9, width=9, units="in")
 
     
         
