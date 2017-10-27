@@ -312,7 +312,7 @@ pfem %>% ggplot (aes(x = year, y = pf))+
   geom_line() + 
   facet_wrap(~area, ncol = 1)
 
-#Harvest Figure 
+#Harvest Figure ----
 read.csv("data/PWSShrimpHarvestComposite_60to2017.csv") -> histHarv
 histHarv %>% select(Year, Total_c, Spots_nc) -> histHarv # select most complete time series from each of nc and c. 
 histHarv %>% gather("fishery", "lbs" , 2:3)  %>% 
@@ -339,8 +339,22 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
 
 ggsave("./figs/HarvestAndSurvey.png", dpi=300, height=4.5, width=6.5, units="in")
 
+# L50 plot ----
+read.csv('output/f50_92to16.csv') %>% select(year = yrs, f50) -> l50
+
+# Survey-wide CPUE plot ----
+avg <- mean(l50$f50) # calc longterm avg
+
+l50 %>% ggplot(aes(x = year, y = f50) ) +
+  scale_x_continuous(breaks = seq(1990,2016,2))  +
+  scale_y_continuous(breaks = seq(38,43,1)) + 
+  labs( x= 'Year', y = 'Mean weight per pot (lb)') +
+  geom_point(size = 2)+ 
+  geom_line () +
+  geom_hline(yintercept = mean(l50$f50), lty = 'dashed')
 
 
+ggsave("./figs/surveyWideL50.png", dpi=300, height=4.0, width=6.5, units="in")
 
 
 
