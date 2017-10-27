@@ -337,24 +337,41 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
                        aes(lty = fishery), color = "black", lwd = 1 )+
             scale_y_continuous(sec.axis = sec_axis(~./100, name = "Survey CPUE (lbs/pot)"))
 
-ggsave("./figs/HarvestAndSurvey.png", dpi=300, height=4.5, width=6.5, units="in")
+#ggsave("./figs/HarvestAndSurvey.png", dpi=300, height=4.5, width=6.5, units="in")
 
-# L50 plot ----
-read.csv('output/f50_92to16.csv') %>% select(year = yrs, f50) -> l50
-
-# Survey-wide CPUE plot ----
-avg <- mean(l50$f50) # calc longterm avg
-
-l50 %>% ggplot(aes(x = year, y = f50) ) +
-  scale_x_continuous(breaks = seq(1990,2016,2))  +
-  scale_y_continuous(breaks = seq(38,43,1)) + 
-  labs( x= 'Year', y = 'L50 (mm)') +
-  geom_point(size = 2)+ 
-  geom_line () +
-  geom_hline(yintercept = mean(l50$f50), lty = 'dashed')
-
-
-ggsave("./figs/surveyWideL50.png", dpi=300, height=4.0, width=6.5, units="in")
+# L50 plots ----
+    # Survey-wide
+    read.csv('output/f50_92to16.csv') %>% select(year = yrs, f50) -> l50
+    avg <- mean(l50$f50) # calc longterm avg
+    
+    l50 %>% ggplot(aes(x = year, y = f50) ) +
+      scale_x_continuous(breaks = seq(1990,2016,2))  +
+      scale_y_continuous(breaks = seq(38,43,1)) + 
+      labs( x= 'Year', y = 'L50 (mm)') +
+      geom_point(size = 2)+ 
+      geom_line () +
+      geom_hline(yintercept = mean(l50$f50), lty = 'dashed')
+    
+    ggsave("./figs/surveyWideL50.png", dpi=300, height=3.5, width=6.5, units="in")
+    
+    # ByArea
+    read.csv('output/f50_byArea_92to16.csv') %>% select (year, 'Area 1' = f50_1, 'Area 2' = f50_2, 'Area 3' = f50_3) -> l50_a
+    
+    l50_a %>% gather(area, l50, 2:4) -> l50_a_l
+    
+    l50_a_l %>% group_by(area) %>% summarise (avg = mean(l50))-> avgs # calc longterm avgs
+    
+      l50_a_l %>% ggplot(aes(x = year, y = l50)) +
+                  scale_x_continuous(breaks = seq(1990,2016,2))  +
+                  scale_y_continuous(breaks = seq(37,43,1)) + 
+                  labs( x= 'Year', y = 'L50 (mm)') +
+                  geom_point(size = 1.5)+ 
+                  geom_line ()  +
+                  theme( axis.text.x  = element_text(angle=0, vjust=0.5)) +
+                  facet_wrap(~area, ncol=1, strip.position="right") + 
+                  geom_hline(aes (yintercept = avg), avgs, lty = 'dashed')
+    
+    ggsave("./figs/L50_byArea.png", dpi=300, height=4.5, width=6.5, units="in")
 
 
 
