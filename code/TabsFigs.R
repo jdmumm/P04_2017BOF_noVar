@@ -342,7 +342,7 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
 # L50 plots ----
     # Survey-wide
     read.csv('output/f50_92to16.csv') %>% select(year = yrs, f50) -> l50
-    avg <- mean(l50$f50) # calc longterm avg
+    avg <- mean(l50$f50, na.rm = T) # calc longterm avg
     
     l50 %>% ggplot(aes(x = year, y = f50) ) +
       scale_x_continuous(breaks = seq(1990,2016,2))  +
@@ -350,7 +350,7 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
       labs( x= 'Year', y = 'L50 (mm)') +
       geom_point(size = 2)+ 
       geom_line () +
-      geom_hline(yintercept = mean(l50$f50), lty = 'dashed')
+      geom_hline(yintercept = avg, lty = 'dashed')
     
     ggsave("./figs/surveyWideL50.png", dpi=300, height=3.5, width=6.5, units="in")
     
@@ -359,7 +359,7 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
     
     l50_a %>% gather(area, l50, 2:4) -> l50_a_l
     
-    l50_a_l %>% group_by(area) %>% summarise (avg = mean(l50))-> avgs # calc longterm avgs
+    l50_a_l %>% group_by(area) %>% summarise (avg = mean(l50, na.rm = T))-> avgs # calc longterm avgs
     
       l50_a_l %>% ggplot(aes(x = year, y = l50)) +
                   scale_x_continuous(breaks = seq(1990,2016,2))  +
