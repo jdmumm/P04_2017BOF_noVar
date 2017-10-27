@@ -1,6 +1,6 @@
 # estimate length at 50% fem using logistic regression
 # Modified from spotLengthPlots_150730.R.  Sloppy, could use much cleaning. 
-# Josh Mumm 171027
+# 171027
 
 #LOAD ----
 library(tidyverse)
@@ -27,6 +27,9 @@ awl$freq <- 1
 awl %>% mutate(Sex = as.factor(sex)) -> awl 
 awl %>% mutate(Year = as.factor(year)) -> awl 
 awl %>% left_join (siteStatLUT, by = c('site' ='SiteNum')) %>% arrange(year) -> dat   
+
+# Filter by area.  Manually changed for byAreaFile 
+#dat%>% filter (ShrimpArea == 1) -> dat
 
 ## ALL YEARS COMBINED ----
 
@@ -110,4 +113,11 @@ plot(f50~yrs, dat = Fem50,type = "l", main = "Length @ 50% Female. Blue is '92 t
 points(f50~yrs, dat = Fem50,  pch = 19, col="red", cex = 1.5, add = "TRUE")
 abline(h=mean(Fem50$f50), col = "blue", lwd = 2)
 
-write.csv(Fem50,"output/f50_92to16.csv")
+#Fem50 -> Fem50_1  # mannually change for by area 
+# colnames(Fem50_1) <- c('year', 'f50_1') 
+# colnames(Fem50_2) <- c('year', 'f50_2') 
+# colnames(Fem50_3) <- c('year', 'f50_3') 
+# Fem50_1 %>% left_join(Fem50_2) %>% left_join(Fem50_3) -> Fem50_byArea
+
+#write.csv(Fem50_byArea, "output/f50_byArea_92to16.csv")
+#write.csv(Fem50,"output/f50_92to16.csv")
