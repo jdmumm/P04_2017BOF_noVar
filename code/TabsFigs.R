@@ -348,7 +348,7 @@ avg <- mean(l50$f50) # calc longterm avg
 l50 %>% ggplot(aes(x = year, y = f50) ) +
   scale_x_continuous(breaks = seq(1990,2016,2))  +
   scale_y_continuous(breaks = seq(38,43,1)) + 
-  labs( x= 'Year', y = 'Mean weight per pot (lb)') +
+  labs( x= 'Year', y = 'L50 (mm)') +
   geom_point(size = 2)+ 
   geom_line () +
   geom_hline(yintercept = mean(l50$f50), lty = 'dashed')
