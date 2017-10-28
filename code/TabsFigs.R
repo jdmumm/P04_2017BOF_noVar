@@ -10,6 +10,7 @@
 library(tidyverse)
 library(reshape2)
 library(extrafont)
+font_import()
 loadfonts(device="win")
 windowsFonts(Times=windowsFont("TT Times New Roman"))
 theme_set(theme_bw(base_size=12,base_family='Times New Roman')+ 
@@ -290,27 +291,50 @@ awl %>% filter  (Sex %in% c('1','2')) %>%
           legend.position = c(.87,-.04), legend.background = element_rect (fill = "transparent" )) 
   #ggsave("./figs/CL_Hist_area.png", dpi=300, height=8.7, width=6.5, units="in")
 # sex ratio ----
-# survey-wide
+# Survey-wide
 awl %>% filter (sex %in% c(1,2)) %>% group_by(year,sex) %>% summarise(cnt =  sum(freq)) -> sx
 sx %>% spread(sex, cnt) -> wid 
 colnames(wid) <- c('year','m','f')
 wid %>% group_by(year) %>% summarise (pf = f/(m+f)) -> pfem
+#write.csv(pfem, 'output/propFemByYear.csv', row.names = FALSE) # mannually added 1996 value from BOF prop sex table .
 
-pfem %>% ggplot (aes(x = year, y = pf))+ 
-  geom_point()+ 
-  geom_line()
+read.csv('output/propFemByYear.csv') -> pfem
+avg <- mean(pfem$pf) # calc longterm avg
 
+pfem %>% ggplot(aes(x = year, y = pf) ) +
+  scale_x_continuous(breaks = seq(1990,2016,2))  +
+  scale_y_continuous(breaks = seq(0,.4,.1)) +
+  labs( x= 'Year', y = 'Female proportion') +
+  geom_point(size = 2)+ 
+  geom_line () +
+  geom_hline(yintercept = avg, lty = 'dashed')
+
+ggsave("./figs/propFem.png", dpi=300, height=3.5, width=6.25, units="in")
 #byArea
 awl %>% filter (sex %in% c(1,2)) %>% group_by(ShrimpArea, year,sex) %>%
   summarise(cnt =  sum(freq)) -> sx
 sx %>% spread(sex, cnt) -> wid 
 colnames(wid) <- c('area','year','m','f')
-wid %>% group_by(area, year) %>% summarise (pf = f/(m+f)) -> pfem
+wid %>% group_by(area, year) %>% summarise (pf = f/(m+f)) -> pfem_a
+#write.csv(pfem_a, 'output/propFemByArea.csv', row.names = FALSE) # mannually added 1996 value from BOF prop sex table .
 
-pfem %>% ggplot (aes(x = year, y = pf))+ 
-  geom_point()+ 
-  geom_line() + 
-  facet_wrap(~area, ncol = 1)
+read.csv('output/propFemByArea.csv') -> pFem_a
+
+pFem_a %>% group_by(area) %>% summarise (avg = mean(pf, na.rm = T))-> avgs # calc longterm avgs
+labels <- c('1' = "Area 1", '2' = "Area 2", '3' = "Area 3")
+
+pFem_a %>% ggplot(aes(x = year, y = pf)) +
+  scale_x_continuous(breaks = seq(1990,2016,2))  +
+  scale_y_continuous(breaks = seq(0,.4,.1)) + 
+  labs( x= 'Year', y = 'Female proportion') +
+  ylim(0,.4) +
+  geom_point(size = 1.5)+ 
+  geom_line () +
+  theme( axis.text.x  = element_text(angle=0, vjust=0.5)) +
+  facet_wrap(~area, ncol=1, strip.position="right", labeller=labeller(area = labels)) + 
+  geom_hline(aes (yintercept = avg), avgs, lty = 'dashed')
+
+ggsave("./figs/propFemByArea.png", dpi=300, height=4.5, width=6.5, units="in")
 
 #Harvest Figure ----
 read.csv("data/PWSShrimpHarvestComposite_60to2017.csv") -> histHarv
@@ -352,7 +376,7 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
       geom_line () +
       geom_hline(yintercept = avg, lty = 'dashed')
     
-    ggsave("./figs/surveyWideL50.png", dpi=300, height=3.5, width=6.5, units="in")
+    #ggsave("./figs/surveyWideL50.png", dpi=300, height=3.5, width=6.5, units="in")
     
     # ByArea
     read.csv('output/f50_byArea_92to16.csv') %>% select (year, 'Area 1' = f50_1, 'Area 2' = f50_2, 'Area 3' = f50_3) -> l50_a
@@ -371,7 +395,7 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
                   facet_wrap(~area, ncol=1, strip.position="right") + 
                   geom_hline(aes (yintercept = avg), avgs, lty = 'dashed')
     
-    ggsave("./figs/L50_byArea.png", dpi=300, height=4.5, width=6.5, units="in")
+    #ggsave("./figs/L50_byArea.png", dpi=300, height=4.5, width=6.5, units="in")
 
 
 
