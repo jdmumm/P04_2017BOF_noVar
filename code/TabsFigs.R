@@ -376,7 +376,7 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
       geom_line () +
       geom_hline(yintercept = avg, lty = 'dashed')
     
-    #ggsave("./figs/surveyWideL50.png", dpi=300, height=3.5, width=6.5, units="in")
+    #ggsave("./figs/surveyWideL50.png", dpi=300, height=3.5, width=6.25, units="in")
     
     # ByArea
     read.csv('output/f50_byArea_92to16.csv') %>% select (year, 'Area 1' = f50_1, 'Area 2' = f50_2, 'Area 3' = f50_3) -> l50_a
