@@ -222,7 +222,7 @@ surv_l %>% left_join(se_byYear_l) %>%
           geom_point(size = 2)+ 
           geom_line () +
           geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0)) + 
-          geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.5,.1)), lty = 'dashed')
+          geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.1,.5)), lty = 'dashed')
         
       
     ggsave("./figs/surveyWideCPUE_lbs_wAllVarOnly.png", dpi=300, height=4.0, width=6.5, units="in")
