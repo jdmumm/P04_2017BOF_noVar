@@ -261,7 +261,7 @@ cpueByArea_l %>% left_join(se_byArea_l) %>%
       facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels)) +
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
     
-    ggsave("./figs/areaCPUE_lbs_w_wVar.png", dpi=300, height=2.9, width=9, units="in")
+    #ggsave("./figs/areaCPUE_lbs_w_wVar.png", dpi=300, height=2.9, width=9, units="in")
 
     
         
