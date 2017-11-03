@@ -204,7 +204,7 @@ var_byYear %>%  transmute (year,
                           all = 2.20462 * se_all_kg,
                           lrg = 2.20462 * se_lrg_kg) -> se_byYear 
 se_byYear %>% gather(class, se, c(all, lrg)) -> se_byYear_l
-se_byYear_l[se_byYear_l$class == 'lrg', 'se']  <- 0  # omit error bars for larges
+#se_byYear_l[se_byYear_l$class == 'lrg', 'se']  <- 0  # omit error bars for larges
 
 surv %>% select (year = Year, all = CPUE_All_LB, lrg = CPUE_Large_LB) %>%
   gather(class, cpue_lb, c(all, lrg)) -> surv_l
@@ -221,11 +221,11 @@ surv_l %>% left_join(se_byYear_l) %>%
           labs( x= 'Year', y = 'Mean weight per pot (lb)') +
           geom_point(size = 2)+ 
           geom_line () +
-          geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0)) + 
+          geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0),position = position_dodge(width = 0.07)) + 
           geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.1,.5)), lty = 'dashed')
         
       
-    ggsave("./figs/surveyWideCPUE_lbs_wAllVarOnly.png", dpi=300, height=4.0, width=6.5, units="in")
+    #ggsave("./figs/surveyWideCPUE_lbs_wVar.png", dpi=300, height=4.0, width=6.5, units="in")
     
 # CPUE by area plot ----
     read.csv('./P04_2017BOF/output/var_byArea.csv') -> var_byArea
@@ -234,7 +234,7 @@ surv_l %>% left_join(se_byYear_l) %>%
                                all = 2.20462 * se_all_kg,
                                lrg = 2.20462 * se_lrg_kg) -> se_byArea 
     se_byArea %>% gather(class, se, c(all, lrg)) -> se_byArea_l
-    se_byArea_l[se_byArea_l$class == 'lrg', 'se']  <- 0  # omit error bars for larges
+    #se_byArea_l[se_byArea_l$class == 'lrg', 'se']  <- 0  # omit error bars for larges
     
 cpueByArea %>% select (year = year, ShrimpArea, all = cpueAllLb, lrg = cpueLrgLb)  %>%  
     gather(class, cpue_lb, c(all,lrg)) -> cpueByArea_l
@@ -256,12 +256,12 @@ cpueByArea_l %>% left_join(se_byArea_l) %>%
       labs( x= 'Year', y = 'Mean weight per pot (lb)') +
       geom_point(size = 1.5)+ 
       geom_line ()  +
-      geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0), position = position_dodge(width = 0.0)) + 
+      geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0), position = position_dodge(width = 0.2)) + 
       theme( axis.text.x  = element_text(angle=90, vjust=0.5)) +
       facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels)) +
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
     
-    ggsave("./figs/areaCPUE_lbs_w_wAllVarOnly.png", dpi=300, height=2.9, width=9, units="in")
+    ggsave("./figs/areaCPUE_lbs_w_wVar.png", dpi=300, height=2.9, width=9, units="in")
 
     
         
