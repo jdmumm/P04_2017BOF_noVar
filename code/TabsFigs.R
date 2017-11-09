@@ -263,25 +263,25 @@ awl %>% left_join (siteStatLUT, by = c('site' ='SiteNum')) -> awl
 #survey-wide 
 awl %>% filter  (Sex %in% c('1','2')) %>% 
   ggplot(aes(cl, fill = Sex ))+ 
-  scale_fill_manual(values=c("#bdbdbd", "#636363"), labels = c('Male','Female'), 
+  scale_fill_manual(values=c("#bdbdbd", "#4a4a4a"), labels = c('Male','Female'), 
                     guide = guide_legend(direction = "horizontal")) +
   facet_wrap(~year, ncol = 1, dir = 'v', strip.position="right", scale='free_y')+
   geom_histogram(aes(y = ..count.. / sapply(PANEL, FUN=function(x) sum(count[PANEL == x]))),
-                 alpha=.8, bins=60, color = 1)+
+                 alpha=.8, bins=60, color = 1, size = .25)+
   ylab("Proportion")+
   scale_y_continuous(breaks = seq(.01,.04,.03)) +
   xlab("Carapace Length (mm)")+
   scale_x_continuous(breaks = seq(10,55,5), limits = c(15,55))+
   theme(panel.spacing.y = unit(0, "lines"), legend.title=element_blank(), 
         legend.position = c(.87,-.04), legend.background = element_rect (fill = "transparent" ))          
-#ggsave("./figs/CL_Hist_surv.png", dpi=300, height=8.7, width=6.5, units="in")
+ggsave("./figs/CL_Hist_surv.png", dpi=300, height=8.7, width=6.5, units="in")
 #byArea  
   awl %>% filter  (Sex == '1' | Sex == '2') %>% 
     ggplot(aes(cl, fill = Sex)) +
-    scale_fill_manual(values=c("#bdbdbd", "#636363"), labels = c('Male','Female'), 
+    scale_fill_manual(values=c("#bdbdbd", "#4a4a4a"), labels = c('Male','Female'), 
                       guide = guide_legend(direction = "horizontal")) +   
     geom_histogram(aes(y = ..count.. / sapply(PANEL, FUN=function(x) sum(count[PANEL == x]))),
-                   alpha=.8, bins=60, color = 1)+
+                   alpha=.8, bins=60, color = 1, size = .01)+
     facet_grid(year ~ ShrimpArea, scale='free_y',labeller=labeller(ShrimpArea = labels)) +
     scale_x_continuous(breaks = seq(10,55,5), limits = c(15,55))+
     ylab("Proportion")+
@@ -309,7 +309,7 @@ pfem %>% ggplot(aes(x = year, y = pf) ) +
   geom_line () +
   geom_hline(yintercept = avg, lty = 'dashed')
 
-ggsave("./figs/propFem.png", dpi=300, height=3.5, width=6.25, units="in")
+#ggsave("./figs/propFem.png", dpi=300, height=3.5, width=6.25, units="in")
 #byArea
 awl %>% filter (sex %in% c(1,2)) %>% group_by(ShrimpArea, year,sex) %>%
   summarise(cnt =  sum(freq)) -> sx
