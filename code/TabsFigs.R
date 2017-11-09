@@ -348,10 +348,10 @@ surv %>% transmute (Year, fishery = as.factor('Pot Survey CPUE'), lbs = CPUE_All
 cbind.data.frame(Year = c(1989,1990,1991),fishery = rep('Pot Survey CPUE',3), lbs = c(130,90,130)) -> oldSurv
 
 rbind.data.frame(oldSurv,dat) -> dat
-
+dat %>% filter (Year < 2017) -> dat
 
 dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
-            scale_y_continuous(breaks = seq(0,300,50)) + ylab('Harvest (Thousands of Pounds)')+
+            scale_y_continuous(breaks = seq(0,300,50)) + ylab('Harvest (thousands of pounds)')+
             scale_x_continuous(breaks = seq(1960,2015, 5)) +
             geom_bar(data = filter (dat, fishery != 'Pot Survey CPUE'), stat = "identity", position = "stack") + 
             scale_fill_manual(values=c("white","gray60", "gray30"), drop = TRUE, 
@@ -361,7 +361,7 @@ dat %>% ggplot(aes (x=Year, y = lbs, fill = fishery)) +
                        aes(lty = fishery), color = "black", lwd = 1 )+
             scale_y_continuous(sec.axis = sec_axis(~./100, name = "Survey CPUE (lbs/pot)"))
 
-#ggsave("./figs/HarvestAndSurvey.png", dpi=300, height=4.5, width=6.5, units="in")
+ggsave("./figs/HarvestAndSurvey.png", dpi=300, height=4.5, width=6.5, units="in")
 
 # L50 plots ----
     # Survey-wide
