@@ -199,7 +199,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
         A
         #ggsave("./figs/areaCL.png", dpi=300, height=2.9, width=9, units="in")
 # Survey-wide CPUE plot ----
-read.csv('./P04_2017BOF/output/var_byYear.csv') -> var_byYear 
+read.csv('./P04_2017BOF/output/var_byYear_xz.csv') -> var_byYear 
 var_byYear %>%  transmute (year,
                           all = 2.20462 * se_all_kg,
                           lrg = 2.20462 * se_lrg_kg) -> se_byYear 
@@ -225,10 +225,10 @@ surv_l %>% left_join(se_byYear_l) %>%
           geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.1,.5)), lty = 'dashed')
         
       
-    #ggsave("./figs/surveyWideCPUE_lbs_wVar.png", dpi=300, height=4.0, width=6.5, units="in")
+    ggsave("./figs/surveyWideCPUE_lbs_wVar_xz.png", dpi=300, height=4.0, width=6.5, units="in")
     
 # CPUE by area plot ----
-    read.csv('./P04_2017BOF/output/var_byArea.csv') -> var_byArea
+    read.csv('./P04_2017BOF/output/var_byArea_xz.csv') -> var_byArea
     var_byArea %>%  transmute (year, 
                                ShrimpArea = as.factor(Area),
                                all = 2.20462 * se_all_kg,
@@ -261,7 +261,7 @@ cpueByArea_l %>% left_join(se_byArea_l) %>%
       facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels)) +
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
     
-    #ggsave("./figs/areaCPUE_lbs_w_wVar.png", dpi=300, height=2.9, width=9, units="in")
+    #ggsave("./figs/areaCPUE_lbs_w_wVar_xz.png", dpi=300, height=2.9, width=9, units="in")
 
     
         
