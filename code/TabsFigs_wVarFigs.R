@@ -221,7 +221,7 @@ surv_l %>% left_join(se_byYear_l) %>%
           labs( x= 'Year', y = 'Mean weight per pot (lb)') +
           geom_point(size = 2)+ 
           geom_line () +
-          geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0),position = position_dodge(width = 0.07)) + 
+          geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0),position = position_dodge(width = 0.00)) + 
           geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.1,.5)), lty = 'dashed')
         
       
@@ -256,7 +256,7 @@ cpueByArea_l %>% left_join(se_byArea_l) %>%
       labs( x= 'Year', y = 'Mean weight per pot (lb)') +
       geom_point(size = 1.5)+ 
       geom_line ()  +
-      geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0), position = position_dodge(width = 0.2)) + 
+      geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0), position = position_dodge(width = 0.0)) + 
       theme( axis.text.x  = element_text(angle=90, vjust=0.5)) +
       facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels)) +
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
