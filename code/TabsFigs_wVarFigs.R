@@ -17,8 +17,8 @@ theme_set(theme_bw(base_size=12,base_family='Times New Roman')+
             theme(panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank()))
 
-read.csv("data/surveyWide_from16SS.csv") -> surv  #Survey-wide summary by year
-read.csv("data/bySite_from16SS.csv")%>%
+read.csv("data/surveyWide_from17SS.csv") -> surv  #Survey-wide summary by year
+read.csv("data/bySite_from17SS.csv")%>%
   transmute(year = Year, site = Site_ID, pots = Pot_Count, all_cnt = Total_Spot_Count, all_lb = Total_Spot_Wt_KG * 2.20462, propLrg = Proportion_Large, 
          lrg_cnt = Est_Count_LG, lrg_lb = Est_Wt_Large * 2.20462, cpue_all_lbs = CPUE_All_LB, cpue_all_cnt = CPUE_All_Count, cpue_lrg_cnt=CPUE_Large_Count) ->site
 read.csv("data/SiteStatArea_LUT.csv") -> siteStatLUT
@@ -70,13 +70,13 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
 # Join HARVEST to SURVEY and write 
   #by ShrimpArea
     left_join(cpueByArea_s,cpueByArea_h, by = "year", suffix = c("_s","_h")) -> cpueByArea
-    #write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
+    write.csv(cpueByArea,"output/CPUEallLb_byShirmpArea.csv")
   #by StatArea
     as.character(unique(siteStatLUT$StatArea)) %>% sort -> surveyedStats
     cpueByStat_h %>% select(c(year,one_of( surveyedStats))) -> cpueByStat_h_surveyed  # limit com stats to those that contain survey sites. 
       left_join(cpueByStat_s,cpueByStat_h_surveyed, by = "year", suffix = c("__s","_h")) %>%
       select(order(colnames(.)))  -> cpueByStat
-      #write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
+      write.csv(cpueByStat,"output/CPUEallLb_byStatArea.csv")
 
 # prop egg bearing by stat ----   
     # join statArea to propEggBearing 
@@ -103,7 +103,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
                         lrg_cnt = Est_Ct_LG, 
                         lrg_cpue_lb = CPUE_Large_LB, 
                         lrg_cpue_cnt = CPUE_Large_Count) -> main
-    #write.csv(main,"output/main.csv")
+    write.csv(main,"output/main.csv")
 # calculate prop sex and prop egg bearing
     # eggsBySite %>% filter(SITE_ID != 11) %>% group_by(YEAR) %>% summarise(                   # excluding valdez for survey-wide 
     #   surveyWidePropFem = round(100 * sum(fems)/(sum(males)+sum(fems)),1),
@@ -199,7 +199,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
         A
         #ggsave("./figs/areaCL.png", dpi=300, height=2.9, width=9, units="in")
 # Survey-wide CPUE plot ----
-read.csv('./P04_2017BOF/output/var_byYear_xz.csv') -> var_byYear 
+read.csv('./P04_2017BOF/output/var_byYear_xz_w17.csv') -> var_byYear 
 var_byYear %>%  transmute (year,
                           all = 2.20462 * se_all_kg,
                           lrg = 2.20462 * se_lrg_kg) -> se_byYear 
@@ -216,8 +216,8 @@ surv_l %>% left_join(se_byYear_l) %>%
   ggplot(aes(x = year, y = cpue_lb, group = class, colour = class) )+
           scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
           theme(legend.position = c(.2,.8)) +
-          scale_x_continuous(breaks = seq(1990,2016,2))  +
-          scale_y_continuous(breaks = seq(0,3,.5)) + 
+          scale_x_continuous(breaks = seq(1990,2017,2))  +
+          scale_y_continuous(breaks = seq(0,5,.5)) + 
           labs( x= 'Year', y = 'Mean weight per pot (lb)') +
           geom_point(size = 2)+ 
           geom_line () +
@@ -228,7 +228,7 @@ surv_l %>% left_join(se_byYear_l) %>%
     ggsave("./figs/surveyWideCPUE_lbs_wVar_xz.png", dpi=300, height=4.0, width=6.5, units="in")
     
 # CPUE by area plot ----
-    read.csv('./P04_2017BOF/output/var_byArea_xz.csv') -> var_byArea
+    read.csv('./P04_2017BOF/output/var_byArea_xz_w17.csv') -> var_byArea
     var_byArea %>%  transmute (year, 
                                ShrimpArea = as.factor(Area),
                                all = 2.20462 * se_all_kg,
@@ -251,8 +251,8 @@ cpueByArea_l %>% left_join(se_byArea_l) %>%
     ggplot(aes(x = year, y = cpue_lb, group = class, colour = class) ) +
       scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
       theme(legend.position = c(.85,.8), legend.background = element_rect (fill = "transparent" )) +
-      scale_x_continuous(breaks = seq(1990,2016,2))  +
-      scale_y_continuous(breaks = seq(0,4,.5)) + 
+      scale_x_continuous(breaks = seq(1990,2017,2))  +
+      scale_y_continuous(breaks = seq(0,6,.5)) + 
       labs( x= 'Year', y = 'Mean weight per pot (lb)') +
       geom_point(size = 1.5)+ 
       geom_line ()  +
@@ -261,7 +261,7 @@ cpueByArea_l %>% left_join(se_byArea_l) %>%
       facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels)) +
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
     
-    #ggsave("./figs/areaCPUE_lbs_w_wVar_xz.png", dpi=300, height=2.9, width=9, units="in")
+    ggsave("./figs/areaCPUE_lbs_w_wVar_xz.png", dpi=300, height=2.9, width=9, units="in")
 
     
         
