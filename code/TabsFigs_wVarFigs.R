@@ -23,7 +23,7 @@ read.csv("data/bySite_from17SS.csv")%>%
          lrg_cnt = Est_Count_LG, lrg_lb = Est_Wt_Large * 2.20462, cpue_all_lbs = CPUE_All_LB, cpue_all_cnt = CPUE_All_Count, cpue_lrg_cnt=CPUE_Large_Count) ->site
 read.csv("data/SiteStatArea_LUT.csv") -> siteStatLUT
 read.csv("data/yearArea_LUT.csv") -> yearAreaLUT
-read.csv("data/femEggBySite.csv") -> egg
+read.csv("data/femEggBySite_w17.csv") -> egg
 read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrimp All.xlsx
   select (year = DOL.Year, species = Species.Code, stat=Stat.Area, pots = Effort..sum., lbs = Whole.Weight..sum.) -> harv
 read.csv('data/AWL_171004.csv') %>% 
@@ -92,7 +92,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       surveyWide = round(100*sum(femsWEggs, na.rm = TRUE)/sum(femsWValidEggCode, na.rm = TRUE),2)) -> eggByYear
     #join by stat area to survey-wide 
     left_join(eggByStat,eggByYear) -> eggsByStatYear  # Percent of females with eggs by stat area and year w surveywide. Vldz excluded from surveywide.
-    #write.csv(eggsByStatYear,"output/eggByStat.csv")
+    write.csv(eggsByStatYear,"output/eggByStat_w17.csv")
 # Main Survey Summary Table ----
     surv %>% transmute (Year, Pots = Pot_Count,
                         all_lb =  Total_Spot_Wt_KG  * 2.20462 ,
