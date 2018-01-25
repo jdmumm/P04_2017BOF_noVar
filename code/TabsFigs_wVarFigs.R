@@ -217,7 +217,7 @@ surv_l %>% left_join(se_byYear_l) %>%
           scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
           theme(legend.position = c(.2,.8)) +
           scale_x_continuous(breaks = seq(1990,2016,2))  +
-          scale_y_continuous(breaks = seq(0,3,.5)) + 
+          scale_y_continuous(breaks = seq(0,5,.5)) +
           labs( x= 'Year', y = 'Mean weight per pot (lb)') +
           geom_point(size = 2)+ 
           geom_line () +
@@ -252,7 +252,7 @@ cpueByArea_l %>% left_join(se_byArea_l) %>%
       scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
       theme(legend.position = c(.85,.8), legend.background = element_rect (fill = "transparent" )) +
       scale_x_continuous(breaks = seq(1990,2016,2))  +
-      scale_y_continuous(breaks = seq(0,4,.5)) + 
+      scale_y_continuous(breaks = seq(0,7,.5)) + 
       labs( x= 'Year', y = 'Mean weight per pot (lb)') +
       geom_point(size = 1.5)+ 
       geom_line ()  +
