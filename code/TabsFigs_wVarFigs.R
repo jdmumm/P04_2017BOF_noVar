@@ -17,8 +17,8 @@ theme_set(theme_bw(base_size=12,base_family='Times New Roman')+
             theme(panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank()))
 
-read.csv("data/surveyWide_from16SS.csv") -> surv  #Survey-wide summary by year
-read.csv("data/bySite_from16SS.csv")%>%
+read.csv("data/surveyWide_core.csv") -> surv  #Survey-wide summary by year
+read.csv("data/bySite_core.csv")%>%
   transmute(year = Year, site = Site_ID, pots = Pot_Count, all_cnt = Total_Spot_Count, all_lb = Total_Spot_Wt_KG * 2.20462, propLrg = Proportion_Large, 
          lrg_cnt = Est_Count_LG, lrg_lb = Est_Wt_Large * 2.20462, cpue_all_lbs = CPUE_All_LB, cpue_all_cnt = CPUE_All_Count, cpue_lrg_cnt=CPUE_Large_Count) ->site
 read.csv("data/SiteStatArea_LUT.csv") -> siteStatLUT
@@ -199,7 +199,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
         A
         #ggsave("./figs/areaCL.png", dpi=300, height=2.9, width=9, units="in")
 # Survey-wide CPUE plot ----
-read.csv('./P04_2017BOF/output/var_byYear_xz.csv') -> var_byYear 
+read.csv('./P04_2017BOF/output/var_byYear_xz_w17_core.csv') -> var_byYear 
 var_byYear %>%  transmute (year,
                           all = 2.20462 * se_all_kg,
                           lrg = 2.20462 * se_lrg_kg) -> se_byYear 
@@ -225,10 +225,10 @@ surv_l %>% left_join(se_byYear_l) %>%
           geom_hline(yintercept = unique(surv_l$avg), colour = grey(c(.1,.5)), lty = 'dashed')
         
       
-    ggsave("./figs/surveyWideCPUE_lbs_wVar_xz.png", dpi=300, height=4.0, width=6.5, units="in")
+    ggsave("./figs/surveyWideCPUE_lbs_wVar_w17_core.png", dpi=300, height=4.0, width=6.5, units="in")
     
 # CPUE by area plot ----
-    read.csv('./P04_2017BOF/output/var_byArea_xz.csv') -> var_byArea
+    read.csv('./P04_2017BOF/output/var_byArea_xz_w17_core.csv') -> var_byArea
     var_byArea %>%  transmute (year, 
                                ShrimpArea = as.factor(Area),
                                all = 2.20462 * se_all_kg,
@@ -261,7 +261,7 @@ cpueByArea_l %>% left_join(se_byArea_l) %>%
       facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels)) +
       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
     
-    #ggsave("./figs/areaCPUE_lbs_w_wVar_xz.png", dpi=300, height=2.9, width=9, units="in")
+    ggsave("./figs/areaCPUE_lbs_w_wVar_xz_w17_core.png", dpi=300, height=2.9, width=9, units="in")
 
     
         
