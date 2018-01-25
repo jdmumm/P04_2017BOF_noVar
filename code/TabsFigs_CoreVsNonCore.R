@@ -118,12 +118,12 @@ rbind(se_byYear_l_all,se_byYear_l_core) -> se_byYear_l_comb
 surv_l_comb %>% left_join(se_byYear_l_comb) %>%
   ggplot(aes(x = year, y = cpue_lb, group = class, colour = class) )+
   #scale_fill_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes_all", "Larges (>32mm)_all","All Sizes_core", "Larges (>32mm)_core")) +
-  scale_colour_manual(values = c("black","mediumblue","dark grey","steelblue4"), name = '', labels = c("All Sizes", "All Sizes_core","Larges (>32mm)", "Larges (>32mm)_core" )) +
+  scale_colour_manual(values = c("black","mediumblue","dark grey","steelblue4"), name = '', labels = c("All Sizes (All Sites)", "All Sizes (Core Sites)","Larges (All Sites)", "Larges (Core Sites)" )) +
   theme(legend.position = c(.2,.8)) +
   scale_x_continuous(breaks = seq(1990,2016,2))  +
   scale_y_continuous(breaks = seq(0,5,.5), lim = c(0,5)) +
   labs( x= 'Year', y = 'Mean weight per pot (lb)') +
-  geom_point(size = 2)+ 
+  geom_point(size = 1.5)+ 
   geom_line () +
   geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0),position = position_dodge(width = 0.00)) 
 
