@@ -127,25 +127,33 @@ surv_l_comb %>% left_join(se_byYear_l_comb) %>%
   geom_line () +
   geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0),position = position_dodge(width = 0.00)) 
 
-ggsave("./figs/surveyWideCPUE_lbs_wVar_coreAndAll.png", dpi=300, height=4.0, width=6.5, units="in")
+ggsave("./figs/surveyWideCPUE_lbs_wVar_coreAndAll.png", dpi=300, height=6.0, width=9, units="in")
 
 
 #######################################################################################################################
 
-
-
-
 # CPUE by area plot ----
-    read.csv('./P04_2017BOF/output/var_byArea_xz_w17_core.csv') -> var_byArea
-    var_byArea %>%  transmute (year, 
+  # CORE  
+    read.csv('./P04_2017BOF/output/var_byArea_xz_w17_core.csv') -> var_byArea_core
+    var_byArea_core %>%  transmute (year, 
                                ShrimpArea = as.factor(Area),
-                               all = 2.20462 * se_all_kg,
-                               lrg = 2.20462 * se_lrg_kg) -> se_byArea 
-    se_byArea %>% gather(class, se, c(all, lrg)) -> se_byArea_l
-    #se_byArea_l[se_byArea_l$class == 'lrg', 'se']  <- 0  # omit error bars for larges
+                               all_core = 2.20462 * se_all_kg,
+                               lrg_core = 2.20462 * se_lrg_kg) -> se_byArea 
+    se_byArea %>% gather(class, se, c(all_core, lrg_core)) -> se_byArea_l_core
     
-cpueByArea %>% select (year = year, ShrimpArea, all = cpueAllLb, lrg = cpueLrgLb)  %>%  
-    gather(class, cpue_lb, c(all,lrg)) -> cpueByArea_l
+    cpueByArea_core %>% select (year = year, ShrimpArea, all_core = cpueAllLb, lrg_core = cpueLrgLb)  %>%  
+      gather(class, cpue_lb, c(all_core,lrg_core)) -> cpueByArea_l_core    
+    
+  # ALL
+    read.csv('./P04_2017BOF/output/var_byArea_xz_w17.csv') -> var_byArea_all
+    var_byArea_all %>%  transmute (year, 
+                               ShrimpArea = as.factor(Area),
+                               all_all = 2.20462 * se_all_kg,
+                               lrg_all = 2.20462 * se_lrg_kg) -> se_byArea 
+    se_byArea %>% gather(class, se, c(all_all, lrg_all)) -> se_byArea_l_all
+    
+    cpueByArea_all %>% select (year = year, ShrimpArea, all_all = cpueAllLb, lrg_all = cpueLrgLb)  %>%  
+    gather(class, cpue_lb, c(all_all,lrg_all)) -> cpueByArea_l_all
     
     cpueByArea_l %>% group_by(class, ShrimpArea) %>% summarise (avg = mean(cpue_lb, na.rm = TRUE))-> avgs # calc longterm avgs
         #Specific values included in resultes
@@ -154,30 +162,42 @@ cpueByArea %>% select (year = year, ShrimpArea, all = cpueAllLb, lrg = cpueLrgLb
           cpueByArea_l %>% filter (class == 'all') %>% group_by(ShrimpArea) %>% summarise (avg =  mean(cpue_lb, na.rm = T))
     
     labels <- c('1' = "Area 1", '2' = "Area 2", '3' = "Area 3")
-    
-cpueByArea_l %>% left_join(se_byArea_l) %>%    
-    ggplot(aes(x = year, y = cpue_lb, group = class, colour = class) ) +
-      scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
-      theme(legend.position = c(.85,.8), legend.background = element_rect (fill = "transparent" )) +
-      scale_x_continuous(breaks = seq(1990,2016,2))  +
-      scale_y_continuous(breaks = seq(0,7,1)) + 
-      labs( x= 'Year', y = 'Mean weight per pot (lb)') +
-      geom_point(size = 1.5)+ 
-      geom_line ()  +
-      geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0), position = position_dodge(width = 0.0)) + 
-      theme( axis.text.x  = element_text(angle=90, vjust=0.5)) +
-      facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels)) +
-      geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
-    
-    ggsave("./figs/areaCPUE_lbs_w_wVar_xz_w17_core.png", dpi=300, height=2.9, width=9, units="in")
+#     
+# cpueByArea_l %>% left_join(se_byArea_l) %>%    
+#     ggplot(aes(x = year, y = cpue_lb, group = class, colour = class) ) +
+#       scale_color_grey(start=.1, end=0.5,  name = '', labels = c("All Sizes", "Larges (>32mm)")) +
+#       theme(legend.position = c(.85,.8), legend.background = element_rect (fill = "transparent" )) +
+#       scale_x_continuous(breaks = seq(1990,2016,2))  +
+#       scale_y_continuous(breaks = seq(0,7,1)) + 
+#       labs( x= 'Year', y = 'Mean weight per pot (lb)') +
+#       geom_point(size = 1.5)+ 
+#       geom_line ()  +
+#       geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0), position = position_dodge(width = 0.0)) + 
+#       theme( axis.text.x  = element_text(angle=90, vjust=0.5)) +
+#       facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels)) +
+#       geom_hline(aes (yintercept = avg), avgs, colour = rep(grey(c(.1,.5)),3), lty = 'dashed')
+#     
+#     #ggsave("./figs/areaCPUE_lbs_w_wVar_xz_w17_core.png", dpi=300, height=2.9, width=9, units="in")
 
+# Combine core and all on one plot  ----    
     
+rbind(cpueByArea_l_all, cpueByArea_l_core ) -> cpueByArea_l_comb 
+rbind(se_byArea_l_all,se_byArea_l_core) -> se_byArea_l_comb     
     
+cpueByArea_l_comb %>% left_join(se_byArea_l_comb) %>%    
+  ggplot(aes(x = year, y = cpue_lb, group = class, colour = class) ) +
+  scale_colour_manual(values = c("black","red","dark grey","lightpink"), name = '', labels = c("All Sizes (All Sites)", "All Sizes (Core Sites)","Larges (All Sites)", "Larges (Core Sites)" )) +
+  theme(legend.position = c(.85,.8), legend.background = element_rect (fill = "transparent" )) +
+  scale_x_continuous(breaks = seq(1990,2016,2))  +
+  scale_y_continuous(breaks = seq(0,7,1)) + 
+  labs( x= 'Year', y = 'Mean weight per pot (lb)') +
+  geom_point(size = 1.5)+ 
+  geom_line ()  +
+  geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0), position = position_dodge(width = 0.0)) + 
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5)) +
+  facet_wrap(~ShrimpArea, ncol=3, labeller=labeller(ShrimpArea = labels))
     
-    
-    
-    
-    
+  ggsave("./figs/areaCPUE_lbs_w_wVar_coreAndAll.png", dpi=300, height=6, width=9, units="in")    
     
     
     
