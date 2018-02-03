@@ -48,7 +48,9 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     cpueBySite_core %>% filter(site %in% c(1,2,3,4,5,7,8)) %>% group_by (year,ShrimpArea) %>% summarize (    
       cpueAllLb = sum(all_lb)/sum(pots), 
       cpueLrgLb = sum(lrg_lb)/sum(pots)) -> cpueByArea_core  # added lrg_lbs for plot after writing cpueByArea csv
-#ALL 
+    #write.csv(cpueByArea_core, './output/CPUELB_byShrimpArea_core.csv')
+    
+    #ALL 
     # join statArea and ShrimpArea to CPUE 
     site_all %>% select(year,site,pots,all_lb,lrg_lb) %>%  
       left_join (
@@ -58,7 +60,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
     cpueBySite_all %>% filter(site != 11) %>% group_by (year,ShrimpArea) %>% summarize (    
       cpueAllLb = sum(all_lb)/sum(pots), 
       cpueLrgLb = sum(lrg_lb)/sum(pots)) -> cpueByArea_all  # added lrg_lbs for plot after writing cpueByArea csv
-    
+    #write.csv(cpueByArea_all, './output/CPUELB_byShrimpArea_w17.csv')   
     
     
 # Survey-wide CPUE plot ----
