@@ -26,11 +26,11 @@ read.csv("data/yearArea_LUT.csv") -> yearAreaLUT
 read.csv("data/femEggBySite_w17.csv") -> egg
 read.csv("data/PWS Shrimp All.csv") %>% # from K:\MANAGEMENT\SHELLFISH\PWS Shrimp All.xlsx
   select (year = DOL.Year, species = Species.Code, stat=Stat.Area, pots = Effort..sum., lbs = Whole.Weight..sum.) -> harv
-read.csv('data/AWL_171004.csv') %>% 
+read.csv('data/AWL_190227.csv') %>% 
          select(year = YEAR, Event = EVENT_ID, site = SITE_ID, Station = STATION_ID, pot = POT_ID, species = FK_SPECIES_CODE,
          sex = FK_SEX_CODE, freq = FREQUENCY, cl = CARAPACE_LENGTH_MM, wt = WEIGHT_GRAMS, eggDev = SHRIMP_EGG_DEVEL_CODE, 
          breed = SHRIMP_BREEDING_CODE, eggCol = SHRIMP_EGG_COLOR_CODE, eggDead = SHRIMP_DEAD_EGG_COUNT, parasite = SHRIMP_PARASITE_CODE) -> awl
-read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site = SITE_ID, pot = POT_ID, Station = STATION, perf = FK_GEAR_PERFORMANCE_CODE, 
+read.csv('data/Pot_Performance_190227.csv') %>% select( Event = EVENT_ID, site = SITE_ID, pot = POT_ID, Station = STATION, perf = FK_GEAR_PERFORMANCE_CODE, 
                                                         gearComment = GEAR_COMMENTS, sample = SAMPLE_POT ) -> pp 
 
 ## ASSEMBLE TABLES ON JRs LIST ####
@@ -174,7 +174,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
       # sexes combined ----
         Y <- ggplot(data = meanLen_bth,
                     aes (x=year, y = len)) +
-          scale_x_continuous(breaks = seq(1990,2016,2))  +      
+          scale_x_continuous(breaks = seq(1990,2018,2))  +      
           scale_y_continuous(breaks = seq(28,34,1)) +
           labs( x= 'Year', y = 'Mean CL (mm)') +
           geom_point(size = 2)+
@@ -187,7 +187,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
         labels <- c('1' = "Area 1", '2' = "Area 2", '3' = "Area 3")
         A <- ggplot(data = meanLen_byArea_bth,
                     aes (x=year, y = len)) +
-          scale_x_continuous(breaks = seq(1990,2016,2))  +      
+          scale_x_continuous(breaks = seq(1990,2018,2))  +      
           theme( axis.text.x  = element_text(angle=90, vjust=0.5)) +
           scale_y_continuous(breaks = seq(27,38,1)) +
           labs( x= 'Year', y = 'Mean CL (mm)')+
@@ -197,7 +197,7 @@ read.csv('data/Pot_Performance_171004.csv') %>% select( Event = EVENT_ID, site =
           geom_errorbar(aes(ymin=len-se, ymax=len+se, width = 0))+
           geom_hline(aes(yintercept = avg) , avgs, lty = 'dashed')
         A
-        #ggsave("./figs/areaCL.png", dpi=300, height=2.9, width=9, units="in")
+        ggsave("./figs/areaCL.png", dpi=300, height=2.9, width=9, units="in")
 # Survey-wide CPUE plot ----
 read.csv('./P04_2017BOF/output/var_byYear_xz_w18.csv') -> var_byYear 
 var_byYear %>%  transmute (year,
