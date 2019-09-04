@@ -208,21 +208,33 @@ cpueByArea_l_comb %>% left_join(se_byArea_l_comb) %>%
   
   #Alls
   AllvCore_wide %>% filter (Year > 2011) -> dat
-    dat %>% 
+ 
+  mod.all <- lm (CPUE_All_Lb_all ~ 0 + CPUE_All_Lb_core , data = dat) 
+  summary(mod.all)  
+  
+  dat %>% 
     ggplot(aes(x = CPUE_All_Lb_core, y = CPUE_All_Lb_all)) +
        geom_point (size = 1) + 
        geom_text(aes(label=Year),hjust=0, vjust=1, size = 2 ) + 
-       geom_smooth(method='lm', se = FALSE)
+       geom_abline (intercept = 0, slope = 0.8606 ) + 
+       geom_abline (intercept = 0, slope = 1 , linetype = 'dashed' ) 
+       
     ggsave ("./figs/coreVsAll_Alls.png", dpi=300, height=3, width=3, units="in")
+  
     
   #Larges  
-  dat %>% 
+    mod.lrg <- lm (CPUE_Large_Lb_all ~ 0 + CPUE_Large_Lb_core, data = dat) 
+    summary(mod.lrg)
+    
+    dat %>% 
     ggplot(aes(x = CPUE_Large_Lb_core, y = CPUE_Large_Lb_all)) +
       geom_point (size = 1) + 
       geom_text(aes(label=Year),hjust=0, vjust=1, size = 2) + 
-      geom_smooth(method='lm', se = FALSE)
-      ggsave ("./figs/coreVsAll_Lrgs.png", dpi=300, height=3, width=3, units="in")    
+      geom_abline (intercept = 0, slope = 0.91371 ) + 
+      geom_abline (intercept = 0, slope = 1 , linetype = 'dashed' ) 
+    ggsave ("./figs/coreVsAll_Lrgs.png", dpi=300, height=3, width=3, units="in")    
  
+    
   
   
   
