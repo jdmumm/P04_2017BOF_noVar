@@ -129,7 +129,7 @@ surv_l_comb %>% left_join(se_byYear_l_comb) %>%
   geom_line () +
   geom_errorbar(aes(ymin=cpue_lb-se, ymax=cpue_lb+se, width = 0),position = position_dodge(width = 0.00)) 
 
-ggsave("./figs/surveyWideCPUE_lbs_wVar_coreAndAll.png", dpi=300, height=6.0, width=9, units="in")
+#ggsave("./figs/surveyWideCPUE_lbs_wVar_coreAndAll.png", dpi=300, height=6.0, width=9, units="in")
 
 
 #######################################################################################################################
@@ -201,21 +201,37 @@ cpueByArea_l_comb %>% left_join(se_byArea_l_comb) %>%
     
   ggsave("./figs/areaCPUE_lbs_w_wVar_coreAndAll.png", dpi=300, height=6, width=9, units="in")    
     
+## explore CF - added 190903 exloring corection factor between all and core based on years of overlap 2012-2017 ----
+  # assemble data 
+  surv_all %>% select (Year, CPUE_All_Lb_all = CPUE_All_LB, CPUE_Large_Lb_all = CPUE_Large_LB) %>% left_join ( 
+  surv_core %>% transmute (Year, CPUE_All_Lb_core = round(CPUE_All_LB,2), CPUE_Large_Lb_core = round(CPUE_Large_LB,2))) -> AllvCore_wide
+  
+  #Alls
+  AllvCore_wide %>% filter (Year > 2011) -> dat
+    dat %>% 
+    ggplot(aes(x = CPUE_All_Lb_core, y = CPUE_All_Lb_all)) +
+       geom_point (size = 2) + 
+       geom_text(aes(label=Year),hjust=0, vjust=1) + 
+       geom_smooth(method='lm', se = FALSE)
+    ggsave ("./figs/coreVsAll_Alls.png")
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  #Larges  
+  dat %>% 
+    ggplot(aes(x = CPUE_Large_Lb_core, y = CPUE_Large_Lb_all)) +
+      geom_point (size = 2) + 
+      geom_text(aes(label=Year),hjust=0, vjust=1) + 
+      geom_smooth(method='lm', se = FALSE) + 
+      ggsave ("./figs/coreVsAll_Lrgs.png")    
+ 
+  
+  
+  
+  
+  
+  
+  
+  
+ 
     
     
     #### Unused for comparison---- 
