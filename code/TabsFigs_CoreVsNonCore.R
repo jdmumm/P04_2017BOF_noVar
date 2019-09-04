@@ -210,18 +210,18 @@ cpueByArea_l_comb %>% left_join(se_byArea_l_comb) %>%
   AllvCore_wide %>% filter (Year > 2011) -> dat
     dat %>% 
     ggplot(aes(x = CPUE_All_Lb_core, y = CPUE_All_Lb_all)) +
-       geom_point (size = 2) + 
-       geom_text(aes(label=Year),hjust=0, vjust=1) + 
+       geom_point (size = 1) + 
+       geom_text(aes(label=Year),hjust=0, vjust=1, size = 2 ) + 
        geom_smooth(method='lm', se = FALSE)
-    ggsave ("./figs/coreVsAll_Alls.png")
+    ggsave ("./figs/coreVsAll_Alls.png", dpi=300, height=3, width=3, units="in")
     
   #Larges  
   dat %>% 
     ggplot(aes(x = CPUE_Large_Lb_core, y = CPUE_Large_Lb_all)) +
-      geom_point (size = 2) + 
-      geom_text(aes(label=Year),hjust=0, vjust=1) + 
-      geom_smooth(method='lm', se = FALSE) + 
-      ggsave ("./figs/coreVsAll_Lrgs.png")    
+      geom_point (size = 1) + 
+      geom_text(aes(label=Year),hjust=0, vjust=1, size = 2) + 
+      geom_smooth(method='lm', se = FALSE)
+      ggsave ("./figs/coreVsAll_Lrgs.png", dpi=300, height=3, width=3, units="in")    
  
   
   
